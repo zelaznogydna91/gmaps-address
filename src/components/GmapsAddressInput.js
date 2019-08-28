@@ -6,8 +6,6 @@ import IconButton from '@material-ui/core/IconButton'
 import SearchIcon from '@material-ui/icons/Search'
 import PinDrop from '@material-ui/icons/PinDrop'
 
-import messages from './messages'
-
 const useStyles = makeStyles(theme => {
   const light = theme.palette.type === 'light'
   const bottomLineColor = light ? 'rgba(0, 0, 0, 0.42)' : 'rgba(255, 255, 255, 0.7)'

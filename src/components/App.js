@@ -1,14 +1,24 @@
 import React from 'react'
-import GmapsAddress from '@bit/zelaznogydna.telaclaims.gmaps-address'
+import { Paper, makeStyles } from '@material-ui/core'
+import GmapsAddress from './GmapsAddress'
 import GmapsAddressInput from './GmapsAddressInput'
-// import ChipAreaSelect from './ChipAreaSelect/ChipAreaSelect'
+import ChipAreaSelect from './ChipAreaSelect'
 
-const App = () => (
-  <div>
-    {/* <ChipAreaSelect></ChipAreaSelect> */}
-    <GmapsAddressInput />
-    <GmapsAddress gmapsApiKey="AIzaSyC43U2-wqXxYEk1RBrTLdkYt3aDoOxO4Fw" />
-  </div>
-)
+const useStyles = makeStyles(theme => ({
+  root: {
+    padding: theme.spacing(3, 2),
+  },
+}))
+
+const App = () => {
+  const classes = useStyles()
+  return (
+    <Paper className={classes.root}>
+      <ChipAreaSelect></ChipAreaSelect>
+      <GmapsAddressInput />
+      <GmapsAddress gmapsApiKey="AIzaSyC43U2-wqXxYEk1RBrTLdkYt3aDoOxO4Fw" />
+    </Paper>
+  )
+}
 
 export default App
