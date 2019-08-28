@@ -3,15 +3,27 @@ import Geocode from 'react-geocode'
 import LocationCityIcon from '@material-ui/icons/LocationCity'
 import TerrainIcon from '@material-ui/icons/Terrain'
 import MapIcon from '@material-ui/icons/Map'
-import { Chip, withStyles } from '@material-ui/core'
-import AsyncMap from './AsyncMap'
+import { Chip } from '@material-ui/core'
+import { withStyles } from '@material-ui/core/styles'
+import GmapsAutocomplete from './GmapsAutocomplete'
+import GmapsWindow from './GmapsWindow'
 
 Geocode.enableDebug()
+
+/**
+ * Material-UI styles
+ */
 const styles = theme => ({
+  root: {
+    display: 'flex',
+    justifyContent: 'center',
+    flexWrap: 'wrap',
+  },
   chip: {
     margin: theme.spacing(1),
   },
 })
+
 class Map extends Component {
   constructor(props) {
     super(props)
@@ -191,29 +203,32 @@ class Map extends Component {
   }
 
   render() {
-    const { classes } = this.props
+    const { classes, inputComponent, inputProps } = this.props
+
     if (this.props.center.lat === undefined) {
       return <div style={{ height: this.props.height }} />
     }
     return (
       <div>
-        <Chip className={classes.chip} icon={<LocationCityIcon />} label={this.state.area} />
-        <Chip className={classes.chip} icon={<TerrainIcon />} label={this.state.city} />
-        <Chip className={classes.chip} icon={<MapIcon />} label={this.state.state} />
-
-        <AsyncMap
-          googleMapURL={`https://maps.googleapis.com/maps/api/js?key=${this.props.gmapsApiKey}&libraries=places`}
-          loadingElement={<div style={{ height: '1300%' }} />}
+        <Chip icon={<LocationCityIcon />} className={classes.chip} label={this.state.area} />
+        <Chip icon={<TerrainIcon />} className={classes.chip} label={this.state.city} />
+        <Chip icon={<MapIcon />} className={classes.chip} label={this.state.state} />
+        <GmapsAutocomplete
+          onPlaceSelected={this.onPlaceSelected}
+          inputComponent={inputComponent}
+          inputProps={inputProps}
+        />
+        <GmapsWindow
           containerElement={<div style={{ height: this.props.height }} />}
           mapElement={<div style={{ height: '100%' }} />}
           zoom={this.props.zoom}
           mapPosition={this.state.markerPosition}
           markerPosition={this.state.markerPosition}
-          onPlaceSelected={this.onPlaceSelected}
           onMarkerDragEnd={this.onMarkerDragEnd}
         />
       </div>
     )
   }
 }
+
 export default withStyles(styles)(Map)
