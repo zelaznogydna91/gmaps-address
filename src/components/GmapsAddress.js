@@ -2,6 +2,7 @@ import React, { useContext } from 'react'
 import PropTypes from 'prop-types'
 import { withScriptjs } from 'react-google-maps'
 import Map from './Map'
+import GmapsAddressInput from './GmapsAddressInput'
 
 export const GmapsContext = React.createContext('')
 
@@ -44,17 +45,9 @@ export default function GmapsAddress(props) {
         center={{ lat: 25.678167, lng: -80.404497 }}
         height="400px"
         zoom={17}
-        inputComponent={props.inputComponent}
-        inputProps={props.inputProps}
+        inputComponent={GmapsAddressInput}
+        inputProps={{}}
       />
     </div>
   )
-}
-GmapsAddress.propTypes = {
-  inputComponent: PropTypes.elementType,
-  inputProps: PropTypes.object,
-}
-GmapsAddress.defaultProps = {
-  inputComponent: 'input',
-  inputProps: {},
 }

@@ -27,7 +27,6 @@ const styles = theme => ({
 class Map extends Component {
   constructor(props) {
     super(props)
-    console.log(props.gmapsApiKey)
     Geocode.setApiKey(props.gmapsApiKey)
     this.state = {
       state: '',
