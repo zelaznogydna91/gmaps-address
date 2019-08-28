@@ -3,11 +3,15 @@ import Geocode from 'react-geocode'
 import LocationCityIcon from '@material-ui/icons/LocationCity'
 import TerrainIcon from '@material-ui/icons/Terrain'
 import MapIcon from '@material-ui/icons/Map'
-import { Chip } from '@material-ui/core'
+import { Chip, withStyles } from '@material-ui/core'
 import AsyncMap from './AsyncMap'
 
 Geocode.enableDebug()
-
+const styles = theme => ({
+  chip: {
+    margin: theme.spacing(1),
+  },
+})
 class Map extends Component {
   constructor(props) {
     super(props)
@@ -187,14 +191,15 @@ class Map extends Component {
   }
 
   render() {
+    const { classes } = this.props
     if (this.props.center.lat === undefined) {
       return <div style={{ height: this.props.height }} />
     }
     return (
       <div>
-        <Chip icon={<LocationCityIcon />} label={this.state.city} />
-        <Chip icon={<TerrainIcon />} label={this.state.area} />
-        <Chip icon={<MapIcon />} label={this.state.state} />
+        <Chip className={classes.chip} icon={<LocationCityIcon />} label={this.state.area} />
+        <Chip className={classes.chip} icon={<TerrainIcon />} label={this.state.city} />
+        <Chip className={classes.chip} icon={<MapIcon />} label={this.state.state} />
 
         <AsyncMap
           googleMapURL={`https://maps.googleapis.com/maps/api/js?key=${this.props.gmapsApiKey}&libraries=places`}
@@ -211,4 +216,4 @@ class Map extends Component {
     )
   }
 }
-export default Map
+export default withStyles(styles)(Map)

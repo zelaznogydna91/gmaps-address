@@ -80,7 +80,7 @@ const useStyles = makeStyles(theme => {
   }
 })
 
-export default function GmapsAddressInput(props) {
+function GmapsAddressInput(props, ref) {
   const classes = useStyles()
   const { locationCity } = props
 
@@ -105,6 +105,7 @@ export default function GmapsAddressInput(props) {
         className={classes.input}
         placeholder="Search Google Maps"
         inputProps={{ 'aria-label': 'search google maps' }}
+        inputRef={ref}
       />
       <IconButton className={classes.iconButton} aria-label="search">
         <SearchIcon />
@@ -117,3 +118,5 @@ export default function GmapsAddressInput(props) {
     // </Paper>
   )
 }
+
+export default React.forwardRef(GmapsAddressInput)
