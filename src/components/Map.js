@@ -3,26 +3,19 @@ import Geocode from 'react-geocode'
 import LocationCityIcon from '@material-ui/icons/LocationCity'
 import TerrainIcon from '@material-ui/icons/Terrain'
 import MapIcon from '@material-ui/icons/Map'
-import { Chip } from '@material-ui/core'
+import { Chip, Paper, IconButton } from '@material-ui/core'
 import { withStyles } from '@material-ui/core/styles'
-import GmapsAutocomplete from './GmapsAutocomplete'
+import PinDrop from '@material-ui/icons/PinDrop'
 import GmapsWindow from './GmapsWindow'
+import GmapsAutocomplete from './GmapsAutocomplete'
+import ChipAreaSelect from './ChipAreaSelect'
 
 Geocode.enableDebug()
 
 /**
  * Material-UI styles
  */
-const styles = theme => ({
-  root: {
-    display: 'flex',
-    justifyContent: 'center',
-    flexWrap: 'wrap',
-  },
-  chip: {
-    margin: theme.spacing(1),
-  },
-})
+const styles = theme => ({})
 
 class Map extends Component {
   constructor(props) {
@@ -41,6 +34,9 @@ class Map extends Component {
         lat: props.center.lat,
         lng: props.center.lng,
       },
+      showMap: false,
+      showChipAreaSelect: false,
+      showAddressInput: true,
     }
   }
 
@@ -53,6 +49,8 @@ class Map extends Component {
       response => {
         const address = response.results[0].formatted_address
         const addressArray = response.results[0].address_components
+        console.log('que vola')
+        console.log(addressArray)
         const city = this.getCity(addressArray)
         const area = this.getArea(addressArray)
         const state = this.getState(addressArray)
@@ -87,7 +85,8 @@ class Map extends Component {
       currState.state !== nextState.state ||
       currState.area !== nextState.area ||
       currState.city !== nextState.city ||
-      currState.address !== nextState.address
+      currState.address !== nextState.address ||
+      currState.showMap !== nextState.showMap
     ) {
       return true
     }
@@ -201,30 +200,49 @@ class Map extends Component {
     })
   }
 
+  handleShowMapToggle = () => {
+    this.setState(prev => ({ showMap: !prev.showMap }))
+  }
+
   render() {
     const { classes, inputComponent, inputProps } = this.props
+    const { showChipAreaSelect, showAddressInput, showMap } = this.state
 
     if (this.props.center.lat === undefined) {
       return <div style={{ height: this.props.height }} />
     }
     return (
       <div>
-        <Chip icon={<LocationCityIcon />} className={classes.chip} label={this.state.area} />
-        <Chip icon={<TerrainIcon />} className={classes.chip} label={this.state.city} />
-        <Chip icon={<MapIcon />} className={classes.chip} label={this.state.state} />
-        <GmapsAutocomplete
-          onPlaceSelected={this.onPlaceSelected}
-          inputComponent={inputComponent}
-          inputProps={inputProps}
-        />
-        <GmapsWindow
-          containerElement={<div style={{ height: this.props.height }} />}
-          mapElement={<div style={{ height: '100%' }} />}
-          zoom={this.props.zoom}
-          mapPosition={this.state.markerPosition}
-          markerPosition={this.state.markerPosition}
-          onMarkerDragEnd={this.onMarkerDragEnd}
-        />
+        {showChipAreaSelect && <ChipAreaSelect />}
+        {showAddressInput && (
+          <div>
+            <GmapsAutocomplete
+              onPlaceSelected={this.onPlaceSelected}
+              inputComponent={inputComponent}
+              inputProps={inputProps}
+            />
+            <IconButton onClick={this.handleShowMapToggle} color="primary" aria-label="map-pin-drop">
+              <PinDrop />
+            </IconButton>
+          </div>
+        )}
+        {showMap && (
+          <GmapsWindow
+            containerElement={<div style={{ height: this.props.height }} />}
+            mapElement={<div style={{ height: '100%' }} />}
+            zoom={this.props.zoom}
+            mapPosition={this.state.markerPosition}
+            markerPosition={this.state.markerPosition}
+            onMarkerDragEnd={this.onMarkerDragEnd}
+          />
+        )}
+        {showChipAreaSelect && (
+          <Paper className={classes.paper}>
+            <Chip clickable icon={<LocationCityIcon />} className={classes.chip} label={this.state.area} />
+            <Chip clickable icon={<TerrainIcon />} className={classes.chip} label={this.state.city} />
+            <Chip clickable icon={<MapIcon />} className={classes.chip} label={this.state.state} />
+          </Paper>
+        )}
       </div>
     )
   }

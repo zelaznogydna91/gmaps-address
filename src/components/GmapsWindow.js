@@ -15,7 +15,6 @@ export default withGoogleMap(props => (
   >
     <Marker
       google={props.google}
-      // name="Dolores park"
       visible
       draggable
       onDragEnd={props.onMarkerDragEnd}
