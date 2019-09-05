@@ -16,7 +16,7 @@ export default function WithGoogleApi(props) {
   return (
     <GmapsContext.Provider value={apiKey}>
       <ApiInstaller
-        googleMapURL={`https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`}
+        googleMapURL={`https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places,geometry`}
         loadingElement={loadingComponent}
         render={() => children}
       />
@@ -31,4 +31,13 @@ WithGoogleApi.propTypes = {
 }
 WithGoogleApi.defaultProps = {
   loadingComponent: <div />,
+}
+
+// HOC fror consuming the gmaps context on class components
+export function withGmapsContext(BaseComp) {
+  const comp = React.forwardRef((props, ref) => (
+    <GmapsContext.Consumer>{apiKey => <BaseComp {...props} apiKey={apiKey} ref={ref} />}</GmapsContext.Consumer>
+  ))
+  comp.displayName = 'WithGmapsContext'
+  return comp
 }

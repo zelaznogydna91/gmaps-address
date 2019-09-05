@@ -6,6 +6,9 @@ import MenuItem from '@material-ui/core/MenuItem'
 import FormControl from '@material-ui/core/FormControl'
 import Select from '@material-ui/core/Select'
 import Chip from '@material-ui/core/Chip'
+import PropTypes from 'prop-types'
+import { FormattedMessage } from 'react-intl'
+import messages from './messages'
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -40,19 +43,6 @@ const MenuProps = {
   },
 }
 
-const areas = [
-  'Kendall, Fl',
-  'Miami, Fl',
-  'Coral Gables, Fl',
-  'Weston, Fl',
-  'Ft. Lauderdale, Fl',
-  'Little Havana, Fl',
-  'Hialeah, Fl',
-  'Homestead, Fl',
-  'Miami Springs, Fl',
-  'Miami Garden, Fl',
-]
-
 function getStyles(name, personName, theme) {
   return {
     fontWeight:
@@ -60,10 +50,11 @@ function getStyles(name, personName, theme) {
   }
 }
 
-export default function ChipAreaSelect() {
+export default function ChipAreaSelect(props) {
   const classes = useStyles()
   const theme = useTheme()
-  const [personName, setPersonName] = React.useState([])
+  const [currentSelection, setCurrentSelection] = React.useState([])
+  const { areas } = props
 
   function handleChange(event) {
     const selection = event.target.value
@@ -73,11 +64,11 @@ export default function ChipAreaSelect() {
       // Show google maps input field
       return
     }
-    setPersonName(values)
+    setCurrentSelection(values)
   }
 
   function handleDelete(value) {
-    return () => setPersonName(personName.filter(x => x !== value))
+    return () => setCurrentSelection(currentSelection.filter(x => x !== value))
   }
 
   return (
@@ -86,7 +77,7 @@ export default function ChipAreaSelect() {
         <InputLabel htmlFor="select-multiple-chip">Service Areas</InputLabel>
         <Select
           multiple
-          value={personName}
+          value={currentSelection}
           onChange={handleChange}
           input={<Input id="select-multiple-chip" />}
           renderValue={selected => (
@@ -106,10 +97,10 @@ export default function ChipAreaSelect() {
               fontStyle: 'italic',
             }}
           >
-            Add New Area ...
+            <FormattedMessage {...messages.addNewArea} />
           </MenuItem>
           {areas.map(name => (
-            <MenuItem key={name} value={name} style={getStyles(name, personName, theme)}>
+            <MenuItem key={name} value={name} style={getStyles(name, currentSelection, theme)}>
               {name}
             </MenuItem>
           ))}
@@ -117,4 +108,12 @@ export default function ChipAreaSelect() {
       </FormControl>
     </div>
   )
+}
+
+ChipAreaSelect.propTypes = {
+  areas: PropTypes.array,
+}
+
+ChipAreaSelect.defaultProps = {
+  areas: [],
 }

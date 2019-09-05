@@ -49,8 +49,6 @@ class Map extends Component {
       response => {
         const address = response.results[0].formatted_address
         const addressArray = response.results[0].address_components
-        console.log('que vola')
-        console.log(addressArray)
         const city = this.getCity(addressArray)
         const area = this.getArea(addressArray)
         const state = this.getState(addressArray)
