@@ -59,20 +59,9 @@ class GmapsAddress extends Component {
         lng: props.center.lng,
       },
       showMap: false,
-      showChipAreaSelect: false,
+      showChipAreaSelect: props.areaMode,
       showAddressInput: true,
-      areas: [
-        'Kendall, Fl',
-        'Miami, Fl',
-        'Coral Gables, Fl',
-        'Weston, Fl',
-        'Ft. Lauderdale, Fl',
-        'Little Havana, Fl',
-        'Hialeah, Fl',
-        'Homestead, Fl',
-        'Miami Springs, Fl',
-        'Miami Garden, Fl',
-      ],
+      areas: props.existingAreas,
     }
   }
 

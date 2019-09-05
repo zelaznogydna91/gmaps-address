@@ -1,7 +1,7 @@
 /**
  * TO BE RENAMED GMAPSADDRESS
  */
-import React from 'react'
+import React, { useState } from 'react'
 import { Paper, makeStyles } from '@material-ui/core'
 import GmapsAddress from './GmapsAddress'
 import WithGoogleApi from './WithGoogleApi'
@@ -20,27 +20,49 @@ const useStyles = makeStyles(theme => ({
   },
 }))
 const data = {
-  areas: [
-    'Kendall, Fl',
-    'Miami, Fl',
-    'Coral Gables, Fl',
-    'Weston, Fl',
-    'Ft. Lauderdale, Fl',
-    'Little Havana, Fl',
-    'Hialeah, Fl',
-    'Homestead, Fl',
-    'Miami Springs, Fl',
-    'Miami Garden, Fl',
+  vendorServiceAreas: [
+    {
+      caption: 'Kendall, Fl',
+      heart: { lat: 25.664112, lng: -80.356857 },
+      polygon: [
+        { lat: 25.634253, lng: -80.388439 },
+        { lat: 25.632716, lng: -80.309863 },
+        { lat: 25.705581, lng: -80.304534 },
+        { lat: 25.703632, lng: -80.387227 },
+      ],
+    },
+    {
+      caption: 'Coral Gables, Fl',
+      heart: { lat: 25.746895, lng: -80.267322 },
+      polygon: [
+        { lat: 25.633666, lng: -80.303403 },
+        { lat: 25.628092, lng: -80.28007 },
+        { lat: 25.706354, lng: -80.242616 },
+        { lat: 25.772882, lng: -80.254253 },
+        { lat: 25.764537, lng: -80.288614 },
+      ],
+    },
   ],
 }
 
 const App = () => {
+  const [streetAddr, setStreetAddr] = useState({ lat: 25.678167, lng: -80.404497 })
+  const [serviceAreas, setServiceAreas] = useState([])
   const classes = useStyles()
   return (
     <Paper className={classes.paper}>
       <LanguageProvider messages={{} /* messages> */}>
         <WithGoogleApi apiKey="AIzaSyC43U2-wqXxYEk1RBrTLdkYt3aDoOxO4Fw">
-          <GmapsAddress areaMode className={classes.component} existingAreas={data.areas} />
+          {/* STREET ADDRESS MODE */}
+          {/* <GmapsAddress className={classes.component} value={streetAddr} onChange={setStreetAddr} /> */}
+          {/* AREA SELECTION MODE */}
+          <GmapsAddress
+            areaMode
+            className={classes.component}
+            boundaries={data.vendorServiceAreas}
+            value={serviceAreas}
+            onChange={setServiceAreas}
+          />
         </WithGoogleApi>
       </LanguageProvider>
     </Paper>

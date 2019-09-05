@@ -17,8 +17,9 @@ const useStyles = makeStyles(theme => ({
   },
   formControl: {
     margin: theme.spacing(1),
-    minWidth: 350,
-    maxWidth: '100%',
+    // minWidth: 350,
+    // maxWidth: '100%',
+    width: '100%',
   },
   chips: {
     display: 'flex',
@@ -99,9 +100,9 @@ export default function ChipAreaSelect(props) {
           >
             <FormattedMessage {...messages.addNewArea} />
           </MenuItem>
-          {areas.map(name => (
-            <MenuItem key={name} value={name} style={getStyles(name, currentSelection, theme)}>
-              {name}
+          {areas.map(area => (
+            <MenuItem key={area} value={area} style={getStyles(area, currentSelection, theme)}>
+              {area}
             </MenuItem>
           ))}
         </Select>
