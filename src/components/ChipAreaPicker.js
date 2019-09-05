@@ -20,30 +20,36 @@ export default function ChipAreaPicker(props) {
   } = props
   return (
     <Paper className={classes.paper}>
-      <Chip
-        clickable
-        onClick={() => handleChipClick(area)}
-        icon={<LocationCityIcon />}
-        className={classes.chip}
-        label={area}
-        color="primary"
-      />
-      <Chip
-        clickable
-        color="primary"
-        onClick={() => handleChipClick(city)}
-        icon={<TerrainIcon />}
-        className={classes.chip}
-        label={city}
-      />
-      <Chip
-        color="primary"
-        clickable
-        onClick={() => handleChipClick(state)}
-        icon={<MapIcon />}
-        className={classes.chip}
-        label={state}
-      />
+      {area && (
+        <Chip
+          clickable
+          onClick={() => handleChipClick(area)}
+          icon={<LocationCityIcon />}
+          className={classes.chip}
+          label={area}
+          color="primary"
+        />
+      )}
+      {city && (
+        <Chip
+          clickable
+          color="primary"
+          onClick={() => handleChipClick(city)}
+          icon={<TerrainIcon />}
+          className={classes.chip}
+          label={city}
+        />
+      )}
+      {state && (
+        <Chip
+          color="primary"
+          clickable
+          onClick={() => handleChipClick(state)}
+          icon={<MapIcon />}
+          className={classes.chip}
+          label={state}
+        />
+      )}
     </Paper>
   )
 }

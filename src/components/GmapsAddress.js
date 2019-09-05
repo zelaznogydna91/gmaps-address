@@ -1,3 +1,4 @@
+import isEmpty from 'lodash/isEmpty'
 import React, { Component, useContext } from 'react'
 import PropTypes from 'prop-types'
 import Geocode from 'react-geocode'
@@ -180,6 +181,7 @@ class GmapsAddress extends Component {
   onMarkerDragEnd = event => {
     const newLat = event.latLng.lat()
     const newLng = event.latLng.lng()
+    console.log('sss', newLat, newLng)
     Geocode.fromLatLng(newLat, newLng).then(
       response => {
         const addressArray = response.results[0].address_components
@@ -206,6 +208,13 @@ class GmapsAddress extends Component {
    */
   onPlaceSelected = async place => {
     console.log('plc', place) // eslint-disable-line no-console
+    if (isEmpty(place.address_components)) {
+      // const sugestions = document.getElementsByClassName('pac-item')
+      // if (isEmpty(sugestions)) return
+      // window.alert(sugestions[0].innerHTML)
+      // this.simulateClick(sugestions[0])
+      return
+    }
     const state = this.getState(place.address_components)
     const area = this.getArea(place.address_components)
     const city = this.getCity(place.address_components)
@@ -256,14 +265,19 @@ class GmapsAddress extends Component {
           <ChipAreaSelect areas={this.state.areas} />
         ) : (
           <div>
-            <GmapsAutocomplete
-              onPlaceSelected={this.onPlaceSelected}
-              inputComponent={inputComponent}
-              inputProps={inputProps}
-            />
-            <IconButton onClick={this.handleShowMapToggle} color="primary" aria-label="map-pin-drop">
-              <PinDrop />
-            </IconButton>
+            <div style={{ display: 'flex' }}>
+              <GmapsAutocomplete
+                onPlaceSelected={this.onPlaceSelected}
+                inputComponent={inputComponent}
+                inputProps={{
+                  fullWidth: true,
+                  ...inputProps,
+                }}
+              />
+              <IconButton onClick={this.handleShowMapToggle} color="primary" aria-label="map-pin-drop">
+                <PinDrop />
+              </IconButton>
+            </div>
             {showMap && (
               <GmapsWindow
                 containerElement={<div style={{ height: this.props.height }} />}
@@ -298,6 +312,7 @@ GmapsAddress.propTypes = {
   height: PropTypes.string,
   zoom: PropTypes.number,
   inputComponent: PropTypes.elementType,
+  inputProps: PropTypes.object,
 }
 
 GmapsAddress.defaultProps = {
@@ -306,6 +321,7 @@ GmapsAddress.defaultProps = {
   height: '300px',
   zoom: 11,
   inputComponent: GmapsAddressInput,
+  inputProps: {},
 }
 
 export default withStyles(styles)(withGmapsContext(GmapsAddress))

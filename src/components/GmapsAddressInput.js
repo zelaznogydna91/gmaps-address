@@ -14,9 +14,16 @@ const useStyles = makeStyles(theme => ({
 
 function GmapsAddressInput(props, ref) {
   const classes = useStyles()
-  const { locationCity } = props
+  const { inputProps, ...others } = props
 
-  return <Input placeholder="Search for your Area" inputProps={{ 'aria-label': 'search google maps' }} inputRef={ref} />
+  return (
+    <Input
+      placeholder="Search for your Area"
+      inputProps={{ 'aria-label': 'search google maps' }}
+      inputRef={ref}
+      {...inputProps}
+    />
+  )
 }
 
 export default React.forwardRef(GmapsAddressInput)
