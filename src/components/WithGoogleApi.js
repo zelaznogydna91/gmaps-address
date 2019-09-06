@@ -12,7 +12,6 @@ const ApiInstaller = withScriptjs(ChildWrapper)
 
 export default function WithGoogleApi(props) {
   const { apiKey, loadingComponent, children } = props
-  // console.log(`https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`)
   return (
     <GmapsContext.Provider value={apiKey}>
       <ApiInstaller

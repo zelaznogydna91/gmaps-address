@@ -44,32 +44,31 @@ const MenuProps = {
   },
 }
 
-function getStyles(name, personName, theme) {
+function getStyles(value, list, theme) {
   return {
-    fontWeight:
-      personName.indexOf(name) === -1 ? theme.typography.fontWeightRegular : theme.typography.fontWeightMedium,
+    fontWeight: list.indexOf(value) === -1 ? theme.typography.fontWeightRegular : theme.typography.fontWeightMedium,
   }
 }
 
 export default function ChipAreaSelect(props) {
   const classes = useStyles()
   const theme = useTheme()
-  const [currentSelection, setCurrentSelection] = React.useState([])
-  const { areas } = props
+  const { options, currentSelection, onChange, onAddNewArea } = props
 
   function handleChange(event) {
     const selection = event.target.value
     const values = selection.filter(x => x !== 'addNewAreaAction')
     if (values.length !== selection.length) {
-      alert('te cogi')
+      // props.onChange(selection)
       // Show google maps input field
+      onAddNewArea()
       return
     }
-    setCurrentSelection(values)
+    onChange(values)
   }
 
   function handleDelete(value) {
-    return () => setCurrentSelection(currentSelection.filter(x => x !== value))
+    return () => onChange(currentSelection.filter(x => x !== value))
   }
 
   return (
@@ -83,8 +82,8 @@ export default function ChipAreaSelect(props) {
           input={<Input id="select-multiple-chip" />}
           renderValue={selected => (
             <div className={classes.chips}>
-              {selected.map(value => (
-                <Chip onDelete={handleDelete(value)} key={value} label={value} className={classes.chip} />
+              {selected.map((value, id) => (
+                <Chip onDelete={handleDelete(value)} key={id} label={value.caption} className={classes.chip} />
               ))}
             </div>
           )}
@@ -100,9 +99,9 @@ export default function ChipAreaSelect(props) {
           >
             <FormattedMessage {...messages.addNewArea} />
           </MenuItem>
-          {areas.map(area => (
-            <MenuItem key={area} value={area} style={getStyles(area, currentSelection, theme)}>
-              {area}
+          {options.map((area, id) => (
+            <MenuItem key={id} value={area} style={getStyles(area.caption, currentSelection, theme)}>
+              {area.caption}
             </MenuItem>
           ))}
         </Select>
@@ -112,9 +111,9 @@ export default function ChipAreaSelect(props) {
 }
 
 ChipAreaSelect.propTypes = {
-  areas: PropTypes.array,
+  options: PropTypes.array,
 }
 
 ChipAreaSelect.defaultProps = {
-  areas: [],
+  options: [],
 }

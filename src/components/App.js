@@ -46,7 +46,7 @@ const data = {
 }
 
 const App = () => {
-  const [streetAddr, setStreetAddr] = useState({ lat: 25.678167, lng: -80.404497 })
+  const [streetAddr, setStreetAddr] = useState(data.vendorServiceAreas[0])
   const [serviceAreas, setServiceAreas] = useState([])
   const classes = useStyles()
   return (

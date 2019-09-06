@@ -16,6 +16,7 @@ const initialTriangleCoords = [
   { lat: 32.321, lng: -64.757 },
   { lat: 18.466, lng: -80.19 },
 ]
+
 export default withGoogleMap(props => {
   const [triangleCoords, setTriangleCoords] = useState(initialTriangleCoords)
   const [markersDefs, setMarkersDef] = useState([{ id: 0 }])
@@ -44,8 +45,8 @@ export default withGoogleMap(props => {
       defaultCenter={{ lat: props.mapPosition.lat, lng: props.mapPosition.lng }}
       onClick={handleClick}
     >
-      <Polygon path={triangleCoords} />
-      {triangleCoords.map((tc, id) => (
+      <Polygon path={triangleCoords} options={{ clickable: true, editable: true }} />
+      {/* {triangleCoords.map((tc, id) => (
         <Marker
           key={id}
           google={props.google}
@@ -62,7 +63,7 @@ export default withGoogleMap(props => {
             scale: 10,
           }}
         />
-      ))}
+      ))} */}
       {markersDefs.map(md =>
         md.id === 0 ? (
           <Marker

@@ -14,42 +14,21 @@ const useStyles = makeStyles(theme => ({
 
 export default function ChipAreaPicker(props) {
   const classes = useStyles()
-  const {
-    handleChipClick,
-    areas: { area, city, state },
-  } = props
+  const { handleChipClick, userAreaOptions } = props
+  const icons = [<LocationCityIcon />, <TerrainIcon />, <MapIcon />]
   return (
     <Paper className={classes.paper}>
-      {area && (
+      {userAreaOptions.map(o => (
         <Chip
+          key={o.level}
           clickable
-          onClick={() => handleChipClick(area)}
-          icon={<LocationCityIcon />}
+          onClick={() => handleChipClick(o)}
+          icon={icons[o.level]}
           className={classes.chip}
-          label={area}
+          label={o.caption}
           color="primary"
         />
-      )}
-      {city && (
-        <Chip
-          clickable
-          color="primary"
-          onClick={() => handleChipClick(city)}
-          icon={<TerrainIcon />}
-          className={classes.chip}
-          label={city}
-        />
-      )}
-      {state && (
-        <Chip
-          color="primary"
-          clickable
-          onClick={() => handleChipClick(state)}
-          icon={<MapIcon />}
-          className={classes.chip}
-          label={state}
-        />
-      )}
+      ))}
     </Paper>
   )
 }

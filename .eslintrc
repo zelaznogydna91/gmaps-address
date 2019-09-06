@@ -8,6 +8,7 @@
     "react/prop-types": "warn",
     "react/destructuring-assignment": "off",
     "react/no-unused-prop-types": "warn",
+    "react/no-unused-state": "warn",
     "prettier/prettier": [
       "error",
       {
