@@ -1,5 +1,5 @@
 import React from 'react'
-import { Paper, Chip } from '@material-ui/core'
+import { Chip, Box } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
 import LocationCityIcon from '@material-ui/icons/LocationCity'
 import TerrainIcon from '@material-ui/icons/Terrain'
@@ -10,6 +10,10 @@ const useStyles = makeStyles(theme => ({
   chip: {
     margin: theme.spacing(1),
   },
+  box: {
+    width: '100%',
+    textAlign: 'center',
+  },
 }))
 
 export default function ChipAreaPicker(props) {
@@ -17,7 +21,7 @@ export default function ChipAreaPicker(props) {
   const { handleChipClick, userAreaOptions } = props
   const icons = [<LocationCityIcon />, <TerrainIcon />, <MapIcon />]
   return (
-    <Paper className={classes.paper}>
+    <Box className={classes.box}>
       {userAreaOptions.map(o => (
         <Chip
           key={o.level}
@@ -29,7 +33,7 @@ export default function ChipAreaPicker(props) {
           color="primary"
         />
       ))}
-    </Paper>
+    </Box>
   )
 }
 

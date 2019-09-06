@@ -17,7 +17,12 @@ import ChipAreaSelect from './ChipAreaSelect'
 import ChipAreaPicker from './ChipAreaPicker'
 
 Geocode.enableDebug()
-const styles = theme => ({})
+const styles = theme => ({
+  gmapsWindow: {
+    marginTop: theme.spacing(1),
+    marginBottom: theme.spacing(1),
+  },
+})
 
 class GmapsAddress extends Component {
   constructor(props) {
@@ -187,6 +192,8 @@ class GmapsAddress extends Component {
 
     if (this.props.areaMode) {
       const geoCodeResp = await Geocode.fromLatLng(latValue, lngValue)
+      console.log('onPlaceSelect - Place Address', placeAddress)
+
       console.log('geoCodeResp - onPlaceSelected', geoCodeResp) // eslint-disable-line no-console
       const userAreaOptions = this.getUserAreaOptionsFromGeocodeResponse(placeAddress, geoCodeResp)
       this.setState({ userAreaOptions })
@@ -218,8 +225,11 @@ class GmapsAddress extends Component {
     let minLevel = 0
     if (placeAddress) {
       const exactResult = geoResp.results.find(r => r.formatted_address === placeAddress)
-      minLevel = levels.findIndex(l => exactResult.types.some(t => t === l))
-      if (minLevel < 0) minLevel = 0
+      console.log('exactResult', exactResult)
+      if (exactResult) {
+        minLevel = Math.max(levels.findIndex(l => exactResult.types.some(t => t === l)), 0)
+        // if (minLevel < 0) minLevel = 0
+      }
     }
 
     const userAreaOptions = []
@@ -272,6 +282,19 @@ class GmapsAddress extends Component {
         }))
   }
 
+  handleAreaChangeOnMapWindow = (areaId, updatedPolygon) => {
+    this.setState(prev => {
+      const update = [...prev.currentAreaSelection]
+      update[areaId] = {
+        ...prev.currentAreaSelection[areaId],
+        polygon: updatedPolygon,
+      }
+      return {
+        currentAreaSelection: update,
+      }
+    })
+  }
+
   render() {
     const { classes, inputComponent, inputProps, boundaries, areaMode } = this.props
     const { showChipAreaSelect, userAreaOptions, showMap, addedUserAreas, currentAreaSelection } = this.state
@@ -296,7 +319,7 @@ class GmapsAddress extends Component {
           />
         ) : (
           <div>
-            <div style={{ display: 'flex' }}>
+            <div style={{ display: 'flex', marginBottom: '1%' }}>
               <GmapsAutocomplete
                 onPlaceSelected={this.onPlaceSelected}
                 inputComponent={inputComponent}
@@ -314,9 +337,12 @@ class GmapsAddress extends Component {
                 containerElement={<div style={{ height: this.props.height }} />}
                 mapElement={<div style={{ height: '100%' }} />}
                 zoom={this.props.zoom}
-                mapPosition={this.state.markerPosition}
+                mapPosition={this.state.mapPosition}
                 markerPosition={this.state.markerPosition}
                 onMarkerDragEnd={this.onMarkerDragEnd}
+                boundaries={boundaries}
+                areas={currentAreaSelection}
+                onAreaChange={this.handleAreaChangeOnMapWindow}
               />
             )}
             {areaMode && (
@@ -342,7 +368,7 @@ GmapsAddress.propTypes = {
 GmapsAddress.defaultProps = {
   areaMode: false,
   center: { lat: 25.678167, lng: -80.404497 },
-  height: '300px',
+  height: '600px',
   zoom: 11,
   inputComponent: GmapsAddressInput,
   inputProps: {},
