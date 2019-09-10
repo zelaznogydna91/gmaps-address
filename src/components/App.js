@@ -1,5 +1,5 @@
 /**
- * TO BE RENAMED GMAPSADDRESS
+ * TO BE RENAMED GmapsAddress
  */
 import React, { useState } from 'react'
 import { Paper, makeStyles } from '@material-ui/core'
@@ -54,15 +54,18 @@ const App = () => {
       <LanguageProvider messages={{} /* messages> */}>
         <WithGoogleApi apiKey="AIzaSyC43U2-wqXxYEk1RBrTLdkYt3aDoOxO4Fw">
           {/* STREET ADDRESS MODE */}
-          {/* <GmapsAddress className={classes.component} value={streetAddr} onChange={setStreetAddr} /> */}
+          <GmapsAddress className={classes.component} value={streetAddr} onChange={setStreetAddr} />
+
           {/* AREA SELECTION MODE */}
-          <GmapsAddress
+          {/* FIX:  I WAS ABLE TO ADD SEVERAL MIAMI-DADE COUNTY TO THE ADDED USER AREA LIST,
+           * EVEN WHEN THEY DIDN'T APPEAR AS A SELECTED CHIP */}
+          {/* <GmapsAddress
             areaMode
             className={classes.component}
             boundaries={data.vendorServiceAreas}
             value={serviceAreas}
             onChange={setServiceAreas}
-          />
+          /> */}
         </WithGoogleApi>
       </LanguageProvider>
     </Paper>

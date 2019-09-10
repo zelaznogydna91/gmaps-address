@@ -3,9 +3,6 @@ import isEmpty from 'lodash/isEmpty'
 import React, { Component, useContext } from 'react'
 import PropTypes from 'prop-types'
 import Geocode from 'react-geocode'
-import LocationCityIcon from '@material-ui/icons/LocationCity'
-import TerrainIcon from '@material-ui/icons/Terrain'
-import MapIcon from '@material-ui/icons/Map'
 import { Chip, Paper, IconButton } from '@material-ui/core'
 import { withStyles } from '@material-ui/core/styles'
 import PinDrop from '@material-ui/icons/PinDrop'
@@ -86,24 +83,6 @@ class GmapsAddress extends Component {
    * @param nextState
    * @return {boolean}
    */
-  // shouldComponentUpdate(nextProps, nextState) {
-  //   const currState = this.state
-  //   if (
-  //     currState.markerPosition.lat !== this.props.center.lat ||
-  //     currState.state !== nextState.state ||
-  //     currState.area !== nextState.area ||
-  //     currState.city !== nextState.city ||
-  //     currState.address !== nextState.address ||
-  //     currState.showMap !== nextState.showMap ||
-  //     currState.currentAreaSelection !== nextState.currentAreaSelection
-  //   ) {
-  //     return true
-  //   }
-  //   if (this.props.center.lat === nextProps.center.lat) {
-  //     return false
-  //   }
-  //   return true
-  // }
 
   /**
    * Get the city from the selected address
@@ -369,7 +348,7 @@ GmapsAddress.defaultProps = {
   areaMode: false,
   center: { lat: 25.678167, lng: -80.404497 },
   height: '600px',
-  zoom: 11,
+  zoom: 17,
   inputComponent: GmapsAddressInput,
   inputProps: {},
 }

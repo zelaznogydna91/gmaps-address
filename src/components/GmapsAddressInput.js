@@ -18,7 +18,7 @@ function GmapsAddressInput(props, ref) {
 
   return (
     <Input
-      placeholder="Search for your Area"
+      placeholder={inputProps.areaMode ? 'Search for your area' : 'Enter your address'}
       inputProps={{ 'aria-label': 'search google maps' }}
       inputRef={ref}
       {...inputProps}
