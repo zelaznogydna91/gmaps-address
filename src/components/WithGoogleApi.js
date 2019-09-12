@@ -1,4 +1,5 @@
-import React, { useContext } from 'react'
+/* global google */
+import React from 'react'
 import PropTypes from 'prop-types'
 import { withScriptjs } from 'react-google-maps'
 
@@ -26,7 +27,7 @@ export default function WithGoogleApi(props) {
 WithGoogleApi.propTypes = {
   apiKey: PropTypes.string,
   loadingComponent: PropTypes.element,
-  children: PropTypes.oneOfType([PropTypes.element, PropTypes.arrayOf(PropTypes.element)]).isRequired,
+  children: PropTypes.oneOfType([PropTypes.element, PropTypes.array]).isRequired,
 }
 WithGoogleApi.defaultProps = {
   loadingComponent: <div />,
@@ -40,3 +41,21 @@ export function withGmapsContext(BaseComp) {
   comp.displayName = 'WithGmapsContext'
   return comp
 }
+
+// common stuffs
+const SECRET_MARKER_KEY = '__SECRET_MARKER_DO_NOT_USE_OR_YOU_WILL_BE_FIRED'
+export const MarkerAnimations = {
+  get BOUNCE() {
+    return google.maps.Animation.BOUNCE
+  },
+  get SMALL_DROP() {
+    return google.maps.Animation.Vm
+  },
+  get DROP() {
+    return google.maps.Animation.DROP
+  },
+  get RARITA() {
+    return google.maps.Animation.Xm
+  },
+}
+export const getGmapsMarkerInstance = markerComponentRef => markerComponentRef.current.state[SECRET_MARKER_KEY]

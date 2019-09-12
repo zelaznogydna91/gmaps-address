@@ -12,6 +12,7 @@ import GmapsWindow from './GmapsWindow'
 import GmapsAutocomplete from './GmapsAutocomplete'
 import ChipAreaSelect from './ChipAreaSelect'
 import ChipAreaPicker from './ChipAreaPicker'
+import GmapsAreaWindow from './GmapsAreaWindow'
 
 Geocode.enableDebug()
 const styles = theme => ({
@@ -26,12 +27,11 @@ class GmapsAddress extends Component {
     super(props)
     Geocode.setApiKey(props.apiKey)
     this.state = {
-      userAreaOptions: null,
-      addedUserAreas: [],
-      state: '',
+      address: '',
       area: '',
       city: '',
-      address: '',
+      state: '',
+
       mapPosition: {
         lat: props.center.lat,
         lng: props.center.lng,
@@ -40,10 +40,14 @@ class GmapsAddress extends Component {
         lat: props.center.lat,
         lng: props.center.lng,
       },
-      showMap: false,
-      showChipAreaSelect: props.areaMode,
-      showAddressInput: true,
+
+      addedUserAreas: [],
       currentAreaSelection: [],
+      userAreaOptions: null,
+
+      showAddressInput: true,
+      showChipAreaSelect: props.areaMode,
+      showMap: false,
     }
   }
 
@@ -51,79 +55,16 @@ class GmapsAddress extends Component {
    * Get the current address from the default map position and set those values in the state
    */
   componentDidMount() {
-    const { mapPosition } = this.state
-    Geocode.fromLatLng(mapPosition.lat, mapPosition.lng).then(
+    const { lat, lng } = this.props.center
+    Geocode.fromLatLng(lat, lng).then(
       response => {
-        const address = response.results[0].formatted_address
-        const addressArray = response.results[0].address_components
-        const city = this.getCity(addressArray)
-        const area = this.getArea(addressArray)
-        const state = this.getState(addressArray)
-
-        console.log('city', city, area, state) // eslint-disable-line no-console
-
-        this.setState({
-          address: address || '',
-          area: area || '',
-          city: city || '',
-          state: state || '',
-        })
+        this.saveStreetAddressDetails(lat, lng, response)
       },
       error => {
         console.error(error) // eslint-disable-line no-console
       }
     )
   }
-
-  /**
-   * Component should only update ( meaning re-render ),
-   * when the user selects the address, or drags the pin
-   *
-   * @param nextProps
-   * @param nextState
-   * @return {boolean}
-   */
-
-  /**
-   * Get the city from the selected address
-   *
-   * @param addressArray
-   * @return {string}
-   */
-  getCity = addressArray => (addressArray.find(x => x.types[0] === 'administrative_area_level_2') || {}).long_name || ''
-
-  /**
-   * Get the area from the selected address
-   *
-   * @param addressArray
-   * @return {string}
-   */
-  getArea = addressArray =>
-    (addressArray.find(x => x.types.some(t => ['sublocality_level_1', 'locality'].includes(t))) || {}).long_name || ''
-
-  /**
-   * Get the state from the selected address
-   *
-   * @param addressArray
-   * @return {string}
-   */
-  getState = addressArray =>
-    (addressArray.find(x => x.types[0] === 'administrative_area_level_1') || {}).long_name || ''
-
-  /**
-   * And function for city,state and address input
-   * @param event
-   */
-  onChange = event => {
-    this.setState({ [event.target.name]: event.target.value })
-  }
-
-  /**
-   * This Event triggers when the marker window is closed
-   *
-   * @param event
-   */
-  onInfoWindowClose = event => {} // eslint-disable-line no-unused-vars
 
   /**
    * When the marker is dragged you get the lat and long using the functions available from event object.
@@ -137,23 +78,36 @@ class GmapsAddress extends Component {
     const newLng = event.latLng.lng()
     Geocode.fromLatLng(newLat, newLng).then(
       response => {
-        const addressArray = response.results[0].address_components
-        const area = this.getArea(addressArray)
-        const city = this.getCity(addressArray)
-        const state = this.getState(addressArray)
-        const address = response.results[0].formatted_address
-        this.setState({
-          area: area || '',
-          city: city || '',
-          state: state || '',
-          address: address || '',
-          markerPosition: { lat: newLat, lng: newLng },
-        })
+        this.saveStreetAddressDetails(newLat, newLng, response)
       },
       error => {
         console.error(error) // eslint-disable-line no-console
       }
     )
+  }
+
+  saveStreetAddressDetails = (newLat, newLng, geoResp, updateMapPos) => {
+    const addressArray = geoResp.results[0].address_components
+    const area =
+      (addressArray.find(x => x.types.some(t => ['sublocality_level_1', 'locality'].includes(t))) || {}).long_name || ''
+    const city = (addressArray.find(x => x.types[0] === 'administrative_area_level_2') || {}).long_name || ''
+    const state = (addressArray.find(x => x.types[0] === 'administrative_area_level_1') || {}).long_name || ''
+    const address = geoResp.results[0].formatted_address
+
+    console.log('city', city, area, state) // eslint-disable-line no-console
+
+    this.setState({
+      address: address || '',
+      area: area || '',
+      city: city || '',
+      state: state || '',
+      markerPosition: { lat: newLat, lng: newLng },
+      ...(updateMapPos
+        ? {
+            mapPosition: { lat: newLat, lng: newLng },
+          }
+        : {}),
+    })
   }
 
   /**
@@ -169,8 +123,9 @@ class GmapsAddress extends Component {
     const latValue = place.geometry.location.lat()
     const lngValue = place.geometry.location.lng()
 
+    const geoCodeResp = await Geocode.fromLatLng(latValue, lngValue)
+
     if (this.props.areaMode) {
-      const geoCodeResp = await Geocode.fromLatLng(latValue, lngValue)
       console.log('onPlaceSelect - Place Address', placeAddress)
 
       console.log('geoCodeResp - onPlaceSelected', geoCodeResp) // eslint-disable-line no-console
@@ -179,24 +134,7 @@ class GmapsAddress extends Component {
       return
     }
 
-    const area = this.getArea(place.address_components)
-    const city = this.getCity(place.address_components)
-    const state = this.getState(place.address_components)
-    // Set these values in the state.
-    this.setState({
-      area: area || '',
-      city: city || '',
-      state: state || '',
-      address: placeAddress || '',
-      markerPosition: {
-        lat: latValue,
-        lng: lngValue,
-      },
-      mapPosition: {
-        lat: latValue,
-        lng: lngValue,
-      },
-    })
+    this.saveStreetAddressDetails(latValue, lngValue, geoCodeResp, true)
   }
 
   getUserAreaOptionsFromGeocodeResponse = (placeAddress, geoResp) => {
@@ -229,6 +167,10 @@ class GmapsAddress extends Component {
     }
     console.log(userAreaOptions)
     return userAreaOptions
+  }
+
+  handleAddressChange = event => {
+    this.setState({ address: event.target.value })
   }
 
   handleShowMapToggle = () => {
@@ -276,7 +218,8 @@ class GmapsAddress extends Component {
 
   render() {
     const { classes, inputComponent, inputProps, boundaries, areaMode } = this.props
-    const { showChipAreaSelect, userAreaOptions, showMap, addedUserAreas, currentAreaSelection } = this.state
+    const inputPlaceholder = areaMode ? 'Search for an area center' : 'Enter your address'
+    const { address, showChipAreaSelect, userAreaOptions, showMap, addedUserAreas, currentAreaSelection } = this.state
     let boundariesAndUserAreas = []
 
     if (this.props.center.lat === undefined) {
@@ -291,44 +234,54 @@ class GmapsAddress extends Component {
       <div>
         {areaMode && showChipAreaSelect ? (
           <ChipAreaSelect
+            inputProps={{ fullWidth: true }}
             options={boundariesAndUserAreas}
             currentSelection={currentAreaSelection}
             onChange={this.handleAreaSelection}
             onAddNewArea={this.handleAddNewArea}
           />
         ) : (
-          <div>
-            <div style={{ display: 'flex', marginBottom: '1%' }}>
-              <GmapsAutocomplete
-                onPlaceSelected={this.onPlaceSelected}
-                inputComponent={inputComponent}
-                inputProps={{
-                  fullWidth: true,
-                  ...inputProps,
-                }}
-              />
-              <IconButton onClick={this.handleShowMapToggle} color="primary" aria-label="map-pin-drop">
-                <PinDrop />
-              </IconButton>
-            </div>
-            {showMap && (
-              <GmapsWindow
-                containerElement={<div style={{ height: this.props.height }} />}
-                mapElement={<div style={{ height: '100%' }} />}
-                zoom={this.props.zoom}
-                mapPosition={this.state.mapPosition}
-                markerPosition={this.state.markerPosition}
-                onMarkerDragEnd={this.onMarkerDragEnd}
-                boundaries={boundaries}
-                areas={currentAreaSelection}
-                onAreaChange={this.handleAreaChangeOnMapWindow}
-              />
-            )}
-            {areaMode && (
-              <ChipAreaPicker userAreaOptions={userAreaOptions || []} handleChipClick={this.addNewUserArea} />
-            )}
-          </div>
+          <GmapsAutocomplete
+            onPlaceSelected={this.onPlaceSelected}
+            inputComponent={inputComponent}
+            inputProps={{
+              fullWidth: true,
+              placeholder: inputPlaceholder,
+              value: address,
+              onChange: this.handleAddressChange,
+              ...inputProps,
+            }}
+          />
         )}
+        {
+          <IconButton onClick={this.handleShowMapToggle} color="primary" aria-label="map-pin-drop">
+            <PinDrop />
+          </IconButton>
+        }
+        {showMap &&
+          (areaMode ? (
+            <GmapsAreaWindow
+              containerElement={<div style={{ height: this.props.height }} />}
+              mapElement={<div style={{ height: '100%' }} />}
+              zoom={this.props.zoom}
+              mapPosition={this.state.mapPosition}
+              markerPosition={this.state.markerPosition}
+              onMarkerDragEnd={this.onMarkerDragEnd}
+              boundaries={boundaries}
+              areas={currentAreaSelection}
+              onAreaChange={this.handleAreaChangeOnMapWindow}
+            />
+          ) : (
+            <GmapsWindow
+              containerElement={<div style={{ height: this.props.height }} />}
+              mapElement={<div style={{ height: '100%' }} />}
+              zoom={this.props.zoom}
+              mapPosition={this.state.mapPosition}
+              markerPosition={this.state.markerPosition}
+              onMarkerDragEnd={this.onMarkerDragEnd}
+            />
+          ))}
+        {areaMode && <ChipAreaPicker userAreaOptions={userAreaOptions || []} handleChipClick={this.addNewUserArea} />}
       </div>
     )
   }
@@ -348,7 +301,7 @@ GmapsAddress.defaultProps = {
   areaMode: false,
   center: { lat: 25.678167, lng: -80.404497 },
   height: '600px',
-  zoom: 17,
+  zoom: 15,
   inputComponent: GmapsAddressInput,
   inputProps: {},
 }

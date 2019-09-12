@@ -16,14 +16,7 @@ function GmapsAddressInput(props, ref) {
   const classes = useStyles()
   const { inputProps, ...others } = props
 
-  return (
-    <Input
-      placeholder={inputProps.areaMode ? 'Search for your area' : 'Enter your address'}
-      inputProps={{ 'aria-label': 'search google maps' }}
-      inputRef={ref}
-      {...inputProps}
-    />
-  )
+  return <Input inputProps={{ 'aria-label': 'search google maps' }} inputRef={ref} {...inputProps} />
 }
 
 export default React.forwardRef(GmapsAddressInput)

@@ -14,6 +14,7 @@ const useStyles = makeStyles(theme => ({
   root: {
     display: 'flex',
     flexWrap: 'wrap',
+    width: '100%',
   },
   formControl: {
     margin: theme.spacing(1),
@@ -77,6 +78,7 @@ export default function ChipAreaSelect(props) {
         <InputLabel htmlFor="select-multiple-chip">Service Areas</InputLabel>
         <Select
           multiple
+          fullWidth
           value={currentSelection}
           onChange={handleChange}
           input={<Input id="select-multiple-chip" />}

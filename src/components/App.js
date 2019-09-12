@@ -2,7 +2,7 @@
  * TO BE RENAMED GmapsAddress
  */
 import React, { useState } from 'react'
-import { Paper, makeStyles } from '@material-ui/core'
+import { Paper, makeStyles, Typography, Divider } from '@material-ui/core'
 import GmapsAddress from './GmapsAddress'
 import WithGoogleApi from './WithGoogleApi'
 import LanguageProvider from './LanguageProvider'
@@ -17,6 +17,12 @@ const useStyles = makeStyles(theme => ({
   component: {
     width: '100%',
     height: '100%',
+  },
+  sections: {
+    padding: theme.spacing(1),
+  },
+  divider: {
+    margin: theme.spacing(1),
   },
 }))
 const data = {
@@ -53,19 +59,21 @@ const App = () => {
     <Paper className={classes.paper}>
       <LanguageProvider messages={{} /* messages> */}>
         <WithGoogleApi apiKey="AIzaSyC43U2-wqXxYEk1RBrTLdkYt3aDoOxO4Fw">
-          {/* STREET ADDRESS MODE */}
+          <Typography className={classes.sections}>STREET ADDRESS MODE</Typography>
           <GmapsAddress className={classes.component} value={streetAddr} onChange={setStreetAddr} />
-
           {/* AREA SELECTION MODE */}
           {/* FIX:  I WAS ABLE TO ADD SEVERAL MIAMI-DADE COUNTY TO THE ADDED USER AREA LIST,
            * EVEN WHEN THEY DIDN'T APPEAR AS A SELECTED CHIP */}
-          {/* <GmapsAddress
+          {/* FIX: ENTERING ADDRESS AND HITTING ENTER DOESNT CENTER THE MAP ON NEW MARKER POSITION */}
+          <Divider className={classes.divider} variant="middle"></Divider>
+          <Typography className={classes.sections}>AREA MODE</Typography>
+          <GmapsAddress
             areaMode
             className={classes.component}
             boundaries={data.vendorServiceAreas}
             value={serviceAreas}
             onChange={setServiceAreas}
-          /> */}
+          />
         </WithGoogleApi>
       </LanguageProvider>
     </Paper>

@@ -43,7 +43,7 @@ class GmapsAutocomplete extends ReactGoogleAutocomplete {
 
   render() {
     // eslint-disable-next-line no-unused-vars
-    const { onPlaceSelected, types, componentRestrictions, bounds, inputComponent, inputProps } = this.props
+    const { inputComponent, inputProps } = this.props
     const InputComponent = inputComponent
     // eslint-disable-next-line react/no-string-refs
     return <InputComponent ref="input" inputProps={inputProps} />

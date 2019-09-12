@@ -1,3 +1,4 @@
 {
-  "workbench.colorTheme": "Ocean Space Italic"
+  "workbench.colorTheme": "Material Theme Ocean",
+  "todo-tree.showTagsFromOpenFilesOnly": false
 }
