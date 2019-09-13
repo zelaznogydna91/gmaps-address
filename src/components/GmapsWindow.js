@@ -19,14 +19,13 @@ export default withGoogleMap(props => {
   return (
     <GoogleMap zoom={props.zoom} google={props.google} center={props.mapPosition}>
       <Marker
-        ref={markerRef}
         draggable
         google={props.google}
         key={0}
-        // animation={markerAnimation}
-        onDragStart={onMarkerDragStart}
         onDragEnd={onMarkerDragEnd}
+        onDragStart={onMarkerDragStart}
         position={{ lat: props.markerPosition.lat, lng: props.markerPosition.lng }}
+        ref={markerRef}
         visible
       />
     </GoogleMap>

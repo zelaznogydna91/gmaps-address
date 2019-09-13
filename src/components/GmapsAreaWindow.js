@@ -15,43 +15,20 @@ import { getGmapsMarkerInstance, MarkerAnimations } from './WithGoogleApi'
 
 const polyColors = ['rebeccapurple', 'fuchsia', 'aqua', 'darkkhaki', 'lightsalmon', 'hotpink', 'brown']
 
-const extendViewport = (viewport, coords) => {
-  if (!viewport)
-    return {
-      sw: { lat: coords.lat, lng: coords.lng },
-      ne: { lat: coords.lat, lng: coords.lng },
-    }
-  const { sw, ne } = viewport
-  if (coords.lat > ne.lat) ne.lat = coords.lat
-  if (coords.lng > ne.lng) ne.lng = coords.lng
-  if (coords.lat < sw.lat) sw.lat = coords.lat
-  if (coords.lng < sw.lng) sw.lng = coords.lng
-  return viewport
-}
-
-const getMapViewportFromBoundaries = boundaries =>
-  boundaries.reduce((viewport, boundary) => {
-    const polyViewport = boundary.polygon.reduce((pv, coords) => extendViewport(pv, coords), null)
-    // the winner
-    return Object.assign(viewport || {}, extendViewport(extendViewport(viewport, polyViewport.sw), polyViewport.ne))
-  }, null)
-
 export default withGoogleMap(props => {
+  const { mapViewport } = props
   const mapRef = useRef()
   const polyRefs = useRef([...Array(props.areas.length)].map(() => createRef()))
   const markerRef = useRef()
 
   useEffect(() => {
-    console.log('did 2')
-    if (!isEmpty(props.boundaries)) {
-      console.log('did 3')
-      const mapViewport = getMapViewportFromBoundaries(props.boundaries)
-      console.log('mapViewport', mapViewport)
+    if (!isEmpty(mapViewport)) {
+      console.log('mapViewport', mapViewport) // eslint-disable-line no-console
       const latlngBounds = new google.maps.LatLngBounds(mapViewport.sw, mapViewport.ne)
-      // mapViewportCenter = latlngBounds.getCenter()
       mapRef.current.fitBounds(latlngBounds)
     }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [mapViewport])
+
   useEffect(() => {
     getGmapsMarkerInstance(markerRef).setAnimation(MarkerAnimations.SMALL_DROP)
   }, [props.mapPosition])
@@ -131,14 +108,15 @@ export default withGoogleMap(props => {
           />
         ))}
       <Marker
-        ref={markerRef}
-        key={0}
-        google={props.google}
-        visible
         animation={google.maps.Animation.DROP}
         draggable
-        onDragEnd={props.onMarkerDragEnd}
+        google={props.google}
+        key={0}
+        onDragEnd={onMarkerDragEnd}
+        onDragStart={onMarkerDragStart}
         position={{ lat: props.markerPosition.lat, lng: props.markerPosition.lng }}
+        ref={markerRef}
+        visible
       />
     </GoogleMap>
   )

@@ -59,13 +59,10 @@ const App = () => {
     <Paper className={classes.paper}>
       <LanguageProvider messages={{} /* messages> */}>
         <WithGoogleApi apiKey="AIzaSyC43U2-wqXxYEk1RBrTLdkYt3aDoOxO4Fw">
-          <Typography className={classes.sections}>STREET ADDRESS MODE</Typography>
-          <GmapsAddress className={classes.component} value={streetAddr} onChange={setStreetAddr} />
           {/* AREA SELECTION MODE */}
-          {/* FIX:  I WAS ABLE TO ADD SEVERAL MIAMI-DADE COUNTY TO THE ADDED USER AREA LIST,
+          {/* TODO:  I WAS ABLE TO ADD SEVERAL MIAMI-DADE COUNTY TO THE ADDED USER AREA LIST,
            * EVEN WHEN THEY DIDN'T APPEAR AS A SELECTED CHIP */}
-          {/* FIX: ENTERING ADDRESS AND HITTING ENTER DOESNT CENTER THE MAP ON NEW MARKER POSITION */}
-          <Divider className={classes.divider} variant="middle"></Divider>
+          {/* FIXME: ENTERING ADDRESS AND HITTING ENTER DOESNT CENTER THE MAP ON NEW MARKER POSITION */}
           <Typography className={classes.sections}>AREA MODE</Typography>
           <GmapsAddress
             areaMode
@@ -74,6 +71,11 @@ const App = () => {
             value={serviceAreas}
             onChange={setServiceAreas}
           />
+
+          <Divider className={classes.divider} variant="middle"></Divider>
+
+          <Typography className={classes.sections}>STREET ADDRESS MODE</Typography>
+          <GmapsAddress className={classes.component} value={streetAddr} onChange={setStreetAddr} />
         </WithGoogleApi>
       </LanguageProvider>
     </Paper>
