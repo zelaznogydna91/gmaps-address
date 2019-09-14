@@ -34,6 +34,10 @@ export default withGoogleMap(props => {
   }, [props.mapPosition])
 
   function updateAreaPolyOnVertexRemove(areaId, vertexId) {
+    if (props.areas[areaId].polygon.length === 3) {
+      props.onAreaRemove(areaId)
+      return
+    }
     const poly = [...props.areas[areaId].polygon]
     poly.splice(vertexId, 1)
     props.onAreaChange(areaId, poly)
@@ -67,13 +71,17 @@ export default withGoogleMap(props => {
     getGmapsMarkerInstance(markerRef).setAnimation(MarkerAnimations.BOUNCE)
   }
   const onMarkerDragEnd = event => {
-    getGmapsMarkerInstance(markerRef).setAnimation(MarkerAnimations.SMALL_DROP)
     props.onMarkerDragEnd(event)
+    getGmapsMarkerInstance(markerRef).setAnimation(MarkerAnimations.SMALL_DROP)
   }
+  // const onMapClick = event => {
+  //   props.onMarkerDragEnd(event)
+  //   getGmapsMarkerInstance(markerRef).setAnimation(MarkerAnimations.SMALL_DROP)
+  // }
 
   console.log('did 1')
   return (
-    <GoogleMap ref={mapRef} google={props.google} center={props.mapPosition}>
+    <GoogleMap ref={mapRef} google={props.google} center={props.mapPosition} onClick={ev => onMarkerDragEnd(ev)}>
       {props.boundaries &&
         props.boundaries.map(b => (
           <Polygon

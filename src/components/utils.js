@@ -1,3 +1,4 @@
+import { makeStyles } from '@material-ui/core/styles'
 import isNumber from 'lodash/isNumber'
 import getProp from 'lodash/get'
 
@@ -26,3 +27,11 @@ export const validLocation = loc => isNumber(getProp(loc, 'lat')) && isNumber(ge
 
 export const validArea = area =>
   validLocation(getProp(area, 'heart')) && getProp(area, 'polygon', []).filter(p => validLocation(p)).length > 2
+
+export const useMultiStyles = styles => {
+  Object.keys(styles).forEach(s => {
+    const styleObj = styles[s]
+    styles[s] = makeStyles(styleObj)()
+  })
+  return styles
+}

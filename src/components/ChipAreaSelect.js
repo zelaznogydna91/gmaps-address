@@ -1,3 +1,4 @@
+import isEmpty from 'lodash/isEmpty'
 import React from 'react'
 import { makeStyles, useTheme } from '@material-ui/core/styles'
 import Input from '@material-ui/core/Input'
@@ -54,6 +55,7 @@ function getStyles(value, list, theme) {
 export default function ChipAreaSelect(props) {
   const classes = useStyles()
   const theme = useTheme()
+
   const { options, currentSelection, onChange, onAddNewArea } = props
 
   function handleChange(event) {
@@ -95,14 +97,18 @@ export default function ChipAreaSelect(props) {
             key="addNewAreaAction"
             value="addNewAreaAction"
             style={{
-              fontWeight: theme.typography.fontWeightRegular,
+              fontWeight: theme.typography.fontWeightMedium,
               fontStyle: 'italic',
             }}
           >
             <FormattedMessage {...messages.addNewArea} />
           </MenuItem>
           {options.map((area, id) => (
-            <MenuItem key={id} value={area} style={getStyles(area.caption, currentSelection, theme)}>
+            <MenuItem
+              key={id}
+              value={area}
+              style={getStyles(area.caption, currentSelection.map(x => x.caption), theme)}
+            >
               {area.caption}
             </MenuItem>
           ))}

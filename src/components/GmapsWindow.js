@@ -12,12 +12,11 @@ export default withGoogleMap(props => {
     getGmapsMarkerInstance(markerRef).setAnimation(MarkerAnimations.BOUNCE)
   }
   const onMarkerDragEnd = event => {
-    getGmapsMarkerInstance(markerRef).setAnimation(MarkerAnimations.SMALL_DROP)
     props.onMarkerDragEnd(event)
+    getGmapsMarkerInstance(markerRef).setAnimation(MarkerAnimations.SMALL_DROP)
   }
-
   return (
-    <GoogleMap zoom={props.zoom} google={props.google} center={props.mapPosition}>
+    <GoogleMap zoom={props.zoom} google={props.google} center={props.mapPosition} onClick={ev => onMarkerDragEnd(ev)}>
       <Marker
         draggable
         google={props.google}

@@ -25,7 +25,12 @@ const useStyles = makeStyles(theme => ({
     margin: theme.spacing(1),
   },
 }))
-const data = {
+
+const sampleData = {
+  vendorStreetAddress: {
+    caption: '9011 SW 122nd Ave, Miami, FL 33186',
+    heart: { lat: 25.684192318072125, lng: -80.39375118467146 },
+  },
   vendorServiceAreas: [
     {
       caption: 'Kendall, Fl',
@@ -52,9 +57,10 @@ const data = {
 }
 
 const App = () => {
-  const [streetAddr, setStreetAddr] = useState(data.vendorServiceAreas[0])
-  const [serviceAreas, setServiceAreas] = useState([])
+  const [streetAddr, setStreetAddr] = useState(sampleData.vendorStreetAddress)
+  const [serviceAreas, setServiceAreas] = useState([sampleData.vendorServiceAreas[1]])
   const classes = useStyles()
+
   return (
     <Paper className={classes.paper}>
       <LanguageProvider messages={{} /* messages> */}>
@@ -67,7 +73,7 @@ const App = () => {
           <GmapsAddress
             areaMode
             className={classes.component}
-            boundaries={data.vendorServiceAreas}
+            boundaries={sampleData.vendorServiceAreas}
             value={serviceAreas}
             onChange={setServiceAreas}
           />
