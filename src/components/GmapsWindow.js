@@ -5,15 +5,18 @@ import { getGmapsMarkerInstance, MarkerAnimations } from './WithGoogleApi'
 export default withGoogleMap(props => {
   const markerRef = useRef()
   useEffect(() => {
-    getGmapsMarkerInstance(markerRef).setAnimation(MarkerAnimations.SMALL_DROP)
+    const marker = getGmapsMarkerInstance(markerRef)
+    if (marker) marker.setAnimation(MarkerAnimations.SMALL_DROP)
   }, [props.mapPosition])
 
   const onMarkerDragStart = () => {
-    getGmapsMarkerInstance(markerRef).setAnimation(MarkerAnimations.BOUNCE)
+    const marker = getGmapsMarkerInstance(markerRef)
+    if (marker) marker.setAnimation(MarkerAnimations.BOUNCE)
   }
   const onMarkerDragEnd = event => {
     props.onMarkerDragEnd(event)
-    getGmapsMarkerInstance(markerRef).setAnimation(MarkerAnimations.SMALL_DROP)
+    const marker = getGmapsMarkerInstance(markerRef)
+    if (marker) marker.setAnimation(MarkerAnimations.SMALL_DROP)
   }
   return (
     <GoogleMap zoom={props.zoom} google={props.google} center={props.mapPosition} onClick={ev => onMarkerDragEnd(ev)}>

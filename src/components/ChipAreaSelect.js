@@ -1,4 +1,3 @@
-import isEmpty from 'lodash/isEmpty'
 import React from 'react'
 import { makeStyles, useTheme } from '@material-ui/core/styles'
 import Input from '@material-ui/core/Input'
@@ -120,6 +119,9 @@ export default function ChipAreaSelect(props) {
 
 ChipAreaSelect.propTypes = {
   options: PropTypes.array,
+  currentSelection: PropTypes.array,
+  onChange: PropTypes.func,
+  onAddNewArea: PropTypes.func,
 }
 
 ChipAreaSelect.defaultProps = {

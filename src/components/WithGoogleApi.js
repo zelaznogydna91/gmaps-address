@@ -44,6 +44,7 @@ export function withGmapsContext(BaseComp) {
 
 // common stuffs
 const SECRET_MARKER_KEY = '__SECRET_MARKER_DO_NOT_USE_OR_YOU_WILL_BE_FIRED'
+const SECRET_POLYGON_KEY = '__SECRET_POLYGON_DO_NOT_USE_OR_YOU_WILL_BE_FIRED'
 export const MarkerAnimations = {
   get BOUNCE() {
     return google.maps.Animation.BOUNCE
@@ -58,4 +59,7 @@ export const MarkerAnimations = {
     return google.maps.Animation.Xm
   },
 }
-export const getGmapsMarkerInstance = markerComponentRef => markerComponentRef.current.state[SECRET_MARKER_KEY]
+export const getGmapsMarkerInstance = markerComponentRef =>
+  markerComponentRef.current && markerComponentRef.current.state[SECRET_MARKER_KEY]
+export const getGmapsPolygonInstance = polygonComponentRef =>
+  polygonComponentRef.current && polygonComponentRef.current.state[SECRET_POLYGON_KEY]

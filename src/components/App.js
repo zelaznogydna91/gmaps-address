@@ -1,11 +1,33 @@
 /**
- * TO BE RENAMED GmapsAddress
+ * TO BE RENAMED GmapsAddress and correct a few bugs...
  */
 import React, { useState } from 'react'
-import { Paper, makeStyles, Typography, Divider } from '@material-ui/core'
+import { Paper, makeStyles, Typography } from '@material-ui/core'
 import GmapsAddress from './GmapsAddress'
 import WithGoogleApi from './WithGoogleApi'
 import LanguageProvider from './LanguageProvider'
+
+const GOOGLE_API_KEY = 'AIzaSyC43U2-wqXxYEk1RBrTLdkYt3aDoOxO4Fw'
+/**
+ * -------------------------------------------TASKS------------------------------------------
+ */
+/* AREA MODE */
+/* TODO: IF 'USA' IS TYPED IT DOESN'T ALLOW USA TO BE SELECTED (CHIP MAXES OUT IN STATES)
+ *       NEW RULE -- ALLOW COUNTRY TO BE SELECTED...(AUTOCOMPLETE'S RANGE IS ON USA ONLY)
+ /* TODO: CLICKING A VENDOR BOUNDARY SHOULD EXIT AND ADD AS SELECTED THE PREVIOUSLY PROVIDED OPTION...
+
+
+/**
+ * ------------------------------------------------------------------------------------------
+ */
+
+/* STREET ADDRESS MODE */
+/**
+/* FIXME: Set address, open map, marker appears on correct location, accept geolocation request, marker moves to current location
+ */
+/**
+ * ------------------------------------------------------------------------------------------
+ */
 
 const useStyles = makeStyles(theme => ({
   paper: {
@@ -60,28 +82,30 @@ const App = () => {
   const [streetAddr, setStreetAddr] = useState(sampleData.vendorStreetAddress)
   const [serviceAreas, setServiceAreas] = useState([sampleData.vendorServiceAreas[1]])
   const classes = useStyles()
+  const areaMode = true
 
   return (
     <Paper className={classes.paper}>
       <LanguageProvider messages={{} /* messages> */}>
-        <WithGoogleApi apiKey="AIzaSyC43U2-wqXxYEk1RBrTLdkYt3aDoOxO4Fw">
-          {/* AREA SELECTION MODE */}
-          {/* TODO:  I WAS ABLE TO ADD SEVERAL MIAMI-DADE COUNTY TO THE ADDED USER AREA LIST,
-           * EVEN WHEN THEY DIDN'T APPEAR AS A SELECTED CHIP */}
-          {/* FIXME: ENTERING ADDRESS AND HITTING ENTER DOESNT CENTER THE MAP ON NEW MARKER POSITION */}
-          <Typography className={classes.sections}>AREA MODE</Typography>
-          <GmapsAddress
-            areaMode
-            className={classes.component}
-            boundaries={sampleData.vendorServiceAreas}
-            value={serviceAreas}
-            onChange={setServiceAreas}
-          />
-
-          <Divider className={classes.divider} variant="middle"></Divider>
-
-          <Typography className={classes.sections}>STREET ADDRESS MODE</Typography>
-          <GmapsAddress className={classes.component} value={streetAddr} onChange={setStreetAddr} />
+        <WithGoogleApi apiKey={`${GOOGLE_API_KEY}`}>
+          {areaMode ? (
+            <div>
+              <Typography className={classes.sections}>AREA MODE</Typography>
+              <GmapsAddress
+                areaMode
+                className={classes.component}
+                boundaries={sampleData.vendorServiceAreas}
+                value={serviceAreas}
+                onChange={setServiceAreas}
+                countries={['us', 'pr']}
+              />
+            </div>
+          ) : (
+            <div>
+              <Typography className={classes.sections}>STREET ADDRESS MODE</Typography>
+              <GmapsAddress className={classes.component} value={streetAddr} onChange={setStreetAddr} />
+            </div>
+          )}
         </WithGoogleApi>
       </LanguageProvider>
     </Paper>

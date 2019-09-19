@@ -1,6 +1,35 @@
-import { makeStyles } from '@material-ui/core/styles'
+import { makeStyles, useTheme } from '@material-ui/core/styles'
 import isNumber from 'lodash/isNumber'
 import getProp from 'lodash/get'
+
+export const useMultiStyles = (styles, props) => {
+  const theme = useTheme()
+  const objStyles = typeof styles === 'function' ? styles(theme) : styles
+  const keys = Object.keys(objStyles)
+  const classesStyles = keys
+    .filter(k => k.startsWith('$'))
+    .map(k => k.substr(1))
+    .reduce(
+      (o, k) =>
+        Object.assign(o, {
+          [k]: makeStyles(objStyles[`$${k}`])(props),
+        }),
+      {}
+    )
+  const classNameStyles = keys
+    .filter(k => !k.startsWith('$'))
+    .reduce(
+      (o, k) =>
+        Object.assign(o, {
+          [k]: objStyles[k],
+        }),
+      {}
+    )
+  return {
+    ...classesStyles,
+    ...makeStyles(classNameStyles)(props),
+  }
+}
 
 const extendViewport = (viewport, coords) => {
   if (!viewport)
@@ -28,10 +57,14 @@ export const validLocation = loc => isNumber(getProp(loc, 'lat')) && isNumber(ge
 export const validArea = area =>
   validLocation(getProp(area, 'heart')) && getProp(area, 'polygon', []).filter(p => validLocation(p)).length > 2
 
-export const useMultiStyles = styles => {
-  Object.keys(styles).forEach(s => {
-    const styleObj = styles[s]
-    styles[s] = makeStyles(styleObj)()
-  })
-  return styles
+export const getStreetAddrPartsFromGeoResult = geoResult => {
+  const addressArray = geoResult.address_components
+  return {
+    area:
+      (addressArray.find(x => x.types.some(t => ['sublocality_level_1', 'locality'].includes(t))) || {}).long_name ||
+      '',
+    city: (addressArray.find(x => x.types[0] === 'administrative_area_level_2') || {}).long_name || '',
+    state: (addressArray.find(x => x.types[0] === 'administrative_area_level_1') || {}).long_name || '',
+    address: geoResult.formatted_address,
+  }
 }

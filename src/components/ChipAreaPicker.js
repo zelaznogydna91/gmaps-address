@@ -1,16 +1,16 @@
 import React from 'react'
 import { Chip, Box, Fab, Divider } from '@material-ui/core'
-import { makeStyles } from '@material-ui/core/styles'
-import LocationCityIcon from '@material-ui/icons/LocationCity'
 import Cancel from '@material-ui/icons/Clear'
-import TerrainIcon from '@material-ui/icons/Terrain'
-import MapIcon from '@material-ui/icons/Map'
+import DirectionsBike from '@material-ui/icons/DirectionsBike'
+import DirectionsCar from '@material-ui/icons/DirectionsCar'
+import Train from '@material-ui/icons/Train'
+import Flight from '@material-ui/icons/Flight'
 import Edit from '@material-ui/icons/Edit'
 import Skeleton from '@material-ui/lab/Skeleton'
-
 import { PropTypes } from 'prop-types'
+import { useMultiStyles } from './utils'
 
-const useStyles = makeStyles(theme => ({
+const styles = theme => ({
   chip: {
     margin: theme.spacing(1),
     alignSelf: 'center',
@@ -42,23 +42,18 @@ const useStyles = makeStyles(theme => ({
     alignSelf: 'center',
     backgroundColor: `${theme.palette.primary.light}80`,
   },
-}))
+})
 
 export default function ChipAreaPicker(props) {
-  const classes = useStyles()
-  const { handleChipClick, userAreaOptions, onEnterEditMode, onCancel, loading } = props
-  const icons = [<LocationCityIcon />, <TerrainIcon />, <MapIcon />, <Edit />, <Cancel />]
+  const classes = useMultiStyles(styles)
+  const { handleChipClick, userAreaOptions, onEnterEditMode, loading } = props
+  // const icons = [<LocationCityIcon />, <TerrainIcon />, <MapIcon />, <Edit />, <Cancel />]
+  const icons = [<DirectionsBike />, <DirectionsCar />, <Train />, <Flight />, <Edit />, <Cancel />]
   return (
     <Box className={classes.box}>
       {loading
         ? [...Array(3)].map((x, i) => (
-            <Skeleton
-              variant="rect"
-              width={128}
-              height={32}
-              classes={{ root: classes.chipSkeleton }}
-              // style={{ borderRadius: 16 }}
-            />
+            <Skeleton key={i} variant="rect" width={128} height={32} className={classes.chipSkeleton} />
           ))
         : userAreaOptions.map(o => (
             <Chip
@@ -72,14 +67,14 @@ export default function ChipAreaPicker(props) {
             />
           ))}
       {loading ? (
-        <Skeleton variant="rect" width={1} height={45} classes={{ root: classes.dividerSkeleton }} />
+        <Skeleton variant="rect" width={1} height={45} className={classes.dividerSkeleton} />
       ) : (
         <Divider className={classes.divider} orientation="vertical" />
       )}
       {loading
         ? [
-            <Skeleton variant="circle" width={40} height={40} classes={{ root: classes.fabSkeleton }} />,
-            <Skeleton variant="circle" width={40} height={40} classes={{ root: classes.fabSkeleton }} />,
+            <Skeleton key={0} variant="circle" width={40} height={40} className={classes.fabSkeleton} />,
+            // <Skeleton key={1} variant="circle" width={40} height={40} className={classes.fabSkeleton} />,
           ]
         : [
             <Fab
@@ -91,16 +86,6 @@ export default function ChipAreaPicker(props) {
               size="small"
             >
               {icons[icons.length - 2]} {/* // The last element is the "go back to edit" button... */}
-            </Fab>,
-            <Fab
-              key="cancel"
-              // clickable
-              onClick={() => onCancel()}
-              className={classes.chip}
-              // color="primary"
-              size="small"
-            >
-              {icons[icons.length - 1]} {/* // The last element is the "go back to edit" button... */}
             </Fab>,
           ]}
     </Box>
@@ -114,4 +99,7 @@ ChipAreaPicker.propTypes = {
     city: PropTypes.string,
     state: PropTypes.string,
   }),
+  userAreaOptions: PropTypes.array,
+  onEnterEditMode: PropTypes.func,
+  loading: PropTypes.bool,
 }

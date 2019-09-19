@@ -1,6 +1,6 @@
 /* global google */
 import isEmpty from 'lodash/isEmpty'
-import React, { useState, useRef, createRef, useEffect } from 'react'
+import React, { useRef, createRef, useEffect } from 'react'
 import {
   withGoogleMap,
   GoogleMap,
@@ -9,28 +9,33 @@ import {
   // InfoWindow,
   Marker,
 } from 'react-google-maps'
-import { getGmapsMarkerInstance, MarkerAnimations } from './WithGoogleApi'
-
-// let nextMarkerId = 1
+import { getGmapsMarkerInstance, getGmapsPolygonInstance, MarkerAnimations } from './WithGoogleApi'
 
 const polyColors = ['rebeccapurple', 'fuchsia', 'aqua', 'darkkhaki', 'lightsalmon', 'hotpink', 'brown']
+class PolyRefMap {
+  getById = id => {
+    if (!this[id]) this[id] = createRef()
+    return this[id]
+  }
+}
 
 export default withGoogleMap(props => {
   const { mapViewport } = props
   const mapRef = useRef()
-  const polyRefs = useRef([...Array(props.areas.length)].map(() => createRef()))
+  const polyRefs = useRef(new PolyRefMap())
+
   const markerRef = useRef()
 
   useEffect(() => {
     if (!isEmpty(mapViewport)) {
-      console.log('mapViewport', mapViewport) // eslint-disable-line no-console
       const latlngBounds = new google.maps.LatLngBounds(mapViewport.sw, mapViewport.ne)
       mapRef.current.fitBounds(latlngBounds)
     }
   }, [mapViewport])
 
   useEffect(() => {
-    getGmapsMarkerInstance(markerRef).setAnimation(MarkerAnimations.SMALL_DROP)
+    const marker = getGmapsMarkerInstance(markerRef)
+    if (marker) marker.setAnimation(MarkerAnimations.SMALL_DROP)
   }, [props.mapPosition])
 
   function updateAreaPolyOnVertexRemove(areaId, vertexId) {
@@ -45,41 +50,41 @@ export default withGoogleMap(props => {
 
   function handleRightClick(areaId) {
     return e => {
-      console.log('right click', e)
       if (e.vertex !== undefined) {
         updateAreaPolyOnVertexRemove(areaId, e.vertex)
       }
     }
   }
 
-  function updateAreaPolyOnVertexAdditionOrDrag(areaId) {
-    const polyRef = polyRefs.current[areaId]
+  function updateAreaPolyOnVertexAdditionOrDrag(areaId, point) {
+    const polyRef = polyRefs.current.getById(areaId)
     const poly = polyRef.current.getPath().g.map(x => ({ lat: x.lat(), lng: x.lng() }))
+
+    const polyInst = getGmapsPolygonInstance(polyRef)
+    if (polyInst) {
+      const result = google.maps.geometry.poly.containsLocation(point, polyInst)
+    }
     props.onAreaChange(areaId, poly)
   }
 
   function handleMouseUp(areaId) {
     return e => {
-      console.log('mouse up', e)
-      if (e.path !== undefined && e.vertex === undefined) {
-        updateAreaPolyOnVertexAdditionOrDrag(areaId)
+      if (e.path !== undefined) {
+        updateAreaPolyOnVertexAdditionOrDrag(areaId, e.latLng)
       }
     }
   }
 
   const onMarkerDragStart = () => {
-    getGmapsMarkerInstance(markerRef).setAnimation(MarkerAnimations.BOUNCE)
+    const marker = getGmapsMarkerInstance(markerRef)
+    if (marker) marker.setAnimation(MarkerAnimations.BOUNCE)
   }
   const onMarkerDragEnd = event => {
     props.onMarkerDragEnd(event)
-    getGmapsMarkerInstance(markerRef).setAnimation(MarkerAnimations.SMALL_DROP)
+    const marker = getGmapsMarkerInstance(markerRef)
+    if (marker) marker.setAnimation(MarkerAnimations.SMALL_DROP)
   }
-  // const onMapClick = event => {
-  //   props.onMarkerDragEnd(event)
-  //   getGmapsMarkerInstance(markerRef).setAnimation(MarkerAnimations.SMALL_DROP)
-  // }
 
-  console.log('did 1')
   return (
     <GoogleMap ref={mapRef} google={props.google} center={props.mapPosition} onClick={ev => onMarkerDragEnd(ev)}>
       {props.boundaries &&
@@ -111,21 +116,23 @@ export default withGoogleMap(props => {
               fillOpacity: 0.05,
             }}
             onRightClick={handleRightClick(id)}
-            ref={polyRefs.current[id]}
+            ref={polyRefs.current.getById(id)}
             onMouseUp={handleMouseUp(id)}
           />
         ))}
-      <Marker
-        animation={google.maps.Animation.DROP}
-        draggable
-        google={props.google}
-        key={0}
-        onDragEnd={onMarkerDragEnd}
-        onDragStart={onMarkerDragStart}
-        position={{ lat: props.markerPosition.lat, lng: props.markerPosition.lng }}
-        ref={markerRef}
-        visible
-      />
+      {props.showMarker && (
+        <Marker
+          animation={google.maps.Animation.DROP}
+          draggable
+          google={props.google}
+          key={0}
+          onDragEnd={onMarkerDragEnd}
+          onDragStart={onMarkerDragStart}
+          position={{ lat: props.markerPosition.lat, lng: props.markerPosition.lng }}
+          ref={markerRef}
+          visible
+        />
+      )}
     </GoogleMap>
   )
 })
