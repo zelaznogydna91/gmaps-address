@@ -19,6 +19,16 @@ const styles = theme => ({
     width: '100%',
     textAlign: 'center',
     display: 'flex',
+    // flexWrap: 'wrap',
+  },
+  chipsOptions: {
+    width: '100%',
+    textAlign: 'center',
+    display: 'flex',
+    flexWrap: 'wrap',
+  },
+  iconButton: {
+    alignSelf: 'center',
   },
   divider: {
     // height: 28,
@@ -36,6 +46,7 @@ const styles = theme => ({
   dividerSkeleton: {
     backgroundColor: 'primary', // '#3f51b560',
     margin: '4px',
+    height: '80%',
   },
   fabSkeleton: {
     margin: theme.spacing(1),
@@ -51,23 +62,25 @@ export default function ChipAreaPicker(props) {
   const icons = [<DirectionsBike />, <DirectionsCar />, <Train />, <Flight />, <Edit />, <Cancel />]
   return (
     <Box className={classes.box}>
-      {loading
-        ? [...Array(3)].map((x, i) => (
-            <Skeleton key={i} variant="rect" width={128} height={32} className={classes.chipSkeleton} />
-          ))
-        : userAreaOptions.map(o => (
-            <Chip
-              key={o.level}
-              clickable
-              onClick={() => handleChipClick(o)}
-              icon={icons[o.level]}
-              className={classes.chip}
-              label={o.caption}
-              color="primary"
-            />
-          ))}
+      <div className={classes.chipsOptions}>
+        {loading
+          ? [...Array(3)].map((x, i) => (
+              <Skeleton key={i} variant="rect" width={128} height={32} className={classes.chipSkeleton} />
+            ))
+          : userAreaOptions.map(o => (
+              <Chip
+                key={o.level}
+                clickable
+                onClick={() => handleChipClick(o)}
+                icon={icons[o.level]}
+                className={classes.chip}
+                label={o.caption}
+                color="primary"
+              />
+            ))}
+      </div>
       {loading ? (
-        <Skeleton variant="rect" width={1} height={45} className={classes.dividerSkeleton} />
+        <Skeleton variant="rect" width={1} className={classes.dividerSkeleton} />
       ) : (
         <Divider className={classes.divider} orientation="vertical" />
       )}
@@ -77,16 +90,18 @@ export default function ChipAreaPicker(props) {
             // <Skeleton key={1} variant="circle" width={40} height={40} className={classes.fabSkeleton} />,
           ]
         : [
-            <Fab
-              key="editAddress"
-              // clickable
-              onClick={() => onEnterEditMode()}
-              className={classes.chip}
-              color="primary"
-              size="small"
-            >
-              {icons[icons.length - 2]} {/* // The last element is the "go back to edit" button... */}
-            </Fab>,
+            <div className={classes.iconButton}>
+              <Fab
+                key="editAddress"
+                // clickable
+                onClick={() => onEnterEditMode()}
+                className={classes.chip}
+                color="primary"
+                size="small"
+              >
+                {icons[icons.length - 2]} {/* // The last element is the "go back to edit" button... */}
+              </Fab>
+            </div>,
           ]}
     </Box>
   )

@@ -8,6 +8,7 @@ import { Fab } from '@material-ui/core'
 import Cancel from '@material-ui/icons/Clear'
 import { withStyles } from '@material-ui/core/styles'
 import PinDrop from '@material-ui/icons/PinDrop'
+import MapIcon from '@material-ui/icons/Map'
 import { withGmapsContext } from './WithGoogleApi'
 import GmapsAddressInput from './GmapsAddressInput'
 import GmapsWindow from './GmapsWindow'
@@ -39,6 +40,10 @@ const styles = theme => ({
   chip: {
     margin: theme.spacing(1),
     alignSelf: 'center',
+  },
+  fabs: {
+    display: 'flex',
+    contentAlign: 'end',
   },
 })
 
@@ -401,7 +406,7 @@ class GmapsAddress extends Component {
               onAddNewArea={this.handleAddNewArea}
             />
           ) : (
-            <div style={{ display: 'flex' }}>
+            <div style={{ display: 'flex', width: '100%' }}>
               {!showChipAreaPicker ? (
                 <GmapsAutocomplete
                   onPlaceSelected={this.onPlaceSelected}
@@ -429,9 +434,9 @@ class GmapsAddress extends Component {
               )}
             </div>
           )}
-          <div>
+          <div className={classes.fabs}>
             <div className={classes.iconButton}>
-              {areaMode && (
+              {areaMode && !showChipAreaSelect && (
                 <Fab
                   key="cancel"
                   // clickable
@@ -439,6 +444,7 @@ class GmapsAddress extends Component {
                   className={classes.chip}
                   // color="primary"
                   size="small"
+                  aria-label="cancel"
                 >
                   <Cancel />
                 </Fab>
@@ -451,7 +457,8 @@ class GmapsAddress extends Component {
                 // color="primary"
                 aria-label="map-pin-drop"
               >
-                <PinDrop />
+                {/* <PinDrop /> */}
+                <MapIcon></MapIcon>
               </Fab>
             </div>
           </div>
@@ -497,7 +504,7 @@ GmapsAddress.propTypes = {
   inputComponent: PropTypes.elementType,
   inputProps: PropTypes.object,
   countries: PropTypes.array,
-  classes: PropTypes.func,
+  classes: PropTypes.object,
   boundaries: PropTypes.arrayOf(
     PropTypes.exact({
       caption: PropTypes.string,

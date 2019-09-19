@@ -31,10 +31,10 @@ const GOOGLE_API_KEY = 'AIzaSyC43U2-wqXxYEk1RBrTLdkYt3aDoOxO4Fw'
 
 const useStyles = makeStyles(theme => ({
   paper: {
-    display: 'block',
-    marginLeft: '25%',
-    padding: theme.spacing(3),
-    width: '50%',
+    // display: 'block',
+    // marginLeft: '25%',
+    // padding: theme.spacing(2),
+    // width: '50%',
   },
   component: {
     width: '100%',
