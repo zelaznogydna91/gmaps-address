@@ -9,32 +9,32 @@ import LanguageProvider from './LanguageProvider'
 
 const GOOGLE_API_KEY = 'AIzaSyC43U2-wqXxYEk1RBrTLdkYt3aDoOxO4Fw'
 /**
- * -------------------------------------------TASKS------------------------------------------
- */
-/* AREA MODE */
+   * -------------------------------------------TASKS------------------------------------------
+   * 
+  /* ------------------------AREA MODE */
 /* TODO: IF 'USA' IS TYPED IT DOESN'T ALLOW USA TO BE SELECTED (CHIP MAXES OUT IN STATES)
- *       NEW RULE -- ALLOW COUNTRY TO BE SELECTED...(AUTOCOMPLETE'S RANGE IS ON USA ONLY)
- /* TODO: CLICKING A VENDOR BOUNDARY SHOULD EXIT AND ADD AS SELECTED THE PREVIOUSLY PROVIDED OPTION...
+       NEW RULE -- ALLOW COUNTRY TO BE SELECTED...(AUTOCOMPLETE'S RANGE IS ON USA ONLY)
 
+/* TODO: CLICKING A VENDOR BOUNDARY SHOULD EXIT AND ADD AS SELECTED THE PREVIOUSLY PROVIDED OPTION...
 
-/**
- * ------------------------------------------------------------------------------------------
- */
+/* TODO: ADDED AREA POLYGON SHOULD BE RED WHEN HEART IS OUTSIDE OF BOUNDARIES
 
-/* STREET ADDRESS MODE */
-/**
-/* FIXME: Set address, open map, marker appears on correct location, accept geolocation request, marker moves to current location
- */
+/* TODO: ON EDITING A VERTEX NEW AREA SELECTION OPTION SHOULD BE ADDED TO SELECT LIST AND SELECTED CHIPS 
+  * ie. ----- Kendall, FL (User)----- USING HEART "ADMIN AREA 2" FOR NAMING CUSTOM INPUT
+
+/* ------------------------STREET ADDRESS MODE */
+
+/* FIXME: SET ADDRESS, OPEN MAP, MARKER APPEARS ON CORRECT LOCATION, ACCEPT GEOLOCATION REQUEST, MARKER MOVES TO CURRENT LOCATION
 /**
  * ------------------------------------------------------------------------------------------
  */
 
 const useStyles = makeStyles(theme => ({
   paper: {
-    // display: 'block',
-    // marginLeft: '25%',
-    // padding: theme.spacing(2),
-    // width: '50%',
+    display: 'block',
+    marginLeft: '25%',
+    padding: theme.spacing(2),
+    width: '50%',
   },
   component: {
     width: '100%',
@@ -55,7 +55,9 @@ const sampleData = {
   },
   vendorServiceAreas: [
     {
+      id: 5,
       caption: 'Kendall, Fl',
+      area: 'Kendall',
       heart: { lat: 25.664112, lng: -80.356857 },
       polygon: [
         { lat: 25.634253, lng: -80.388439 },
@@ -65,14 +67,31 @@ const sampleData = {
       ],
     },
     {
-      caption: 'Coral Gables, Fl',
-      heart: { lat: 25.746895, lng: -80.267322 },
+      id: 6,
+      caption: 'Coral Gables, FL, USA',
+      area: 'Coral Gables',
+      heart: { lat: 25.7491968, lng: -80.2635411 },
       polygon: [
-        { lat: 25.633666, lng: -80.303403 },
-        { lat: 25.628092, lng: -80.28007 },
-        { lat: 25.706354, lng: -80.242616 },
-        { lat: 25.772882, lng: -80.254253 },
-        { lat: 25.764537, lng: -80.288614 },
+        { lat: 25.771853, lng: -80.1956259 },
+        { lat: 25.771853, lng: -80.3013 },
+        { lat: 25.609988, lng: -80.3013 },
+        { lat: 25.609988, lng: -80.1956259 },
+      ],
+    },
+  ],
+
+  userServiceAreas: [
+    {
+      id: 10,
+      caption: 'Main Area',
+      area: 'Coral Gables',
+      state: 'Fl',
+      heart: { lat: 25.7491968, lng: -80.2635411 },
+      polygon: [
+        { lat: 25.771853, lng: -80.1956259 },
+        { lat: 25.771853, lng: -80.3013 },
+        { lat: 25.609988, lng: -80.3013 },
+        { lat: 25.609988, lng: -80.1956259 },
       ],
     },
   ],
@@ -80,7 +99,7 @@ const sampleData = {
 
 const App = () => {
   const [streetAddr, setStreetAddr] = useState(sampleData.vendorStreetAddress)
-  const [serviceAreas, setServiceAreas] = useState([sampleData.vendorServiceAreas[1]])
+  const [serviceAreas, setServiceAreas] = useState(sampleData.userServiceAreas)
   const classes = useStyles()
   const areaMode = true
 

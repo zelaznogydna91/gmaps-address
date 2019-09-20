@@ -6,6 +6,7 @@ import MenuItem from '@material-ui/core/MenuItem'
 import FormControl from '@material-ui/core/FormControl'
 import Select from '@material-ui/core/Select'
 import Chip from '@material-ui/core/Chip'
+import Typography from '@material-ui/core/Typography'
 import PropTypes from 'prop-types'
 import { FormattedMessage } from 'react-intl'
 import messages from './messages'
@@ -15,6 +16,10 @@ const useStyles = makeStyles(theme => ({
     display: 'flex',
     flexWrap: 'wrap',
     width: '100%',
+  },
+  selectorSection: {
+    backgroundColor: 'rgba(0, 0, 0, 0.08)',
+    opacity: 'rgba(0, 0, 0, 0.8)',
   },
   formControl: {
     // margin: theme.spacing(1),
@@ -39,7 +44,7 @@ const ITEM_PADDING_TOP = 8
 const MenuProps = {
   PaperProps: {
     style: {
-      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+      maxHeight: ITEM_HEIGHT * 5.5 + ITEM_PADDING_TOP,
       width: 250,
     },
   },
@@ -57,16 +62,15 @@ export default function ChipAreaSelect(props) {
 
   const { options, currentSelection, onChange, onAddNewArea } = props
 
+  function addNewAreaActionWasSelected(selection) {
+    const values = selection.filter(x => x !== 'addNewAreaAction')
+    return values.length !== selection.length
+  }
+
   function handleChange(event) {
     const selection = event.target.value
-    const values = selection.filter(x => x !== 'addNewAreaAction')
-    if (values.length !== selection.length) {
-      // props.onChange(selection)
-      // Show google maps input field
-      onAddNewArea()
-      return
-    }
-    onChange(values)
+    // eslint-disable-next-line no-unused-expressions
+    addNewAreaActionWasSelected(selection) ? onAddNewArea() : onChange(selection)
   }
 
   function handleDelete(value) {
@@ -86,7 +90,12 @@ export default function ChipAreaSelect(props) {
           renderValue={selected => (
             <div className={classes.chips}>
               {selected.map((value, id) => (
-                <Chip onDelete={handleDelete(value)} key={id} label={value.caption} className={classes.chip} />
+                <Chip
+                  onDelete={handleDelete(value)}
+                  key={id}
+                  label={`${value.caption} (${value.area})`}
+                  className={classes.chip}
+                />
               ))}
             </div>
           )}
@@ -102,15 +111,34 @@ export default function ChipAreaSelect(props) {
           >
             <FormattedMessage {...messages.addNewArea} />
           </MenuItem>
-          {options.map((area, id) => (
-            <MenuItem
-              key={id}
-              value={area}
-              style={getStyles(area.caption, currentSelection.map(x => x.caption), theme)}
-            >
-              {area.caption}
-            </MenuItem>
-          ))}
+          <MenuItem value="" className={classes.selectorSection} disableGutters dense disabled>
+            <Typography variant="caption">&nbsp;&nbsp;From boundaries</Typography>
+          </MenuItem>
+          {options
+            .filter(a => a.isBoundary)
+            .map((area, id) => (
+              <MenuItem
+                key={id}
+                value={area}
+                style={getStyles(area.caption, currentSelection.map(x => x.caption), theme)}
+              >
+                {`${area.caption}`}
+              </MenuItem>
+            ))}
+          <MenuItem value="" className={classes.selectorSection} disableGutters dense disabled>
+            <Typography variant="caption">&nbsp;&nbsp;User Areas</Typography>
+          </MenuItem>
+          {options
+            .filter(a => !a.isBoundary)
+            .map((area, id) => (
+              <MenuItem
+                key={id}
+                value={area}
+                style={getStyles(area.caption, currentSelection.map(x => x.caption), theme)}
+              >
+                {`${area.caption} (${area.area})`}
+              </MenuItem>
+            ))}
         </Select>
       </FormControl>
     </div>

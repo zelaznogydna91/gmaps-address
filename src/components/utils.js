@@ -1,6 +1,8 @@
 import { makeStyles, useTheme } from '@material-ui/core/styles'
 import isNumber from 'lodash/isNumber'
+import roundNumber from 'lodash/round'
 import getProp from 'lodash/get'
+import isEmpty from 'lodash/isEmpty'
 
 export const useMultiStyles = (styles, props) => {
   const theme = useTheme()
@@ -59,12 +61,30 @@ export const validArea = area =>
 
 export const getStreetAddrPartsFromGeoResult = geoResult => {
   const addressArray = geoResult.address_components
+  const area =
+    (addressArray.find(x => x.types.some(t => ['sublocality_level_1', 'locality'].includes(t))) || {}).long_name || ''
+  const city = (addressArray.find(x => x.types[0] === 'administrative_area_level_2') || {}).long_name || ''
+  const state = (addressArray.find(x => x.types[0] === 'administrative_area_level_1') || {}).long_name || ''
+  if (isEmpty(area) && isEmpty(city) && isEmpty(state)) return {}
   return {
-    area:
-      (addressArray.find(x => x.types.some(t => ['sublocality_level_1', 'locality'].includes(t))) || {}).long_name ||
-      '',
-    city: (addressArray.find(x => x.types[0] === 'administrative_area_level_2') || {}).long_name || '',
-    state: (addressArray.find(x => x.types[0] === 'administrative_area_level_1') || {}).long_name || '',
+    area,
+    city,
+    state,
     address: geoResult.formatted_address,
   }
+}
+
+const fixedNumber = n => roundNumber(n, 10)
+const equalCoords = (c1, c2) => c1.lat === c2.lat && c1.lng === c2.lng
+
+export const sameAreas = (a1, a2) => {
+  const p1 = a1.polygon.map(c => ({ lat: fixedNumber(c.lat), lng: fixedNumber(c.lng) }))
+  const p2 = a2.polygon.map(c => ({ lat: fixedNumber(c.lat), lng: fixedNumber(c.lng) }))
+  if (p1.length !== p2.length) return false
+  const i2 = p2.findIndex(c => equalCoords(p1[0], c))
+  if (i2 < 0) return false
+  for (let i1 = 0; i1 < p1.length; i1 += 1) {
+    if (!equalCoords(p1[i1], p2[(i2 + i1) % p1.length])) return false
+  }
+  return true
 }

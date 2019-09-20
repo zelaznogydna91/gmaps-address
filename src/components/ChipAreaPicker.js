@@ -11,10 +11,6 @@ import { PropTypes } from 'prop-types'
 import { useMultiStyles } from './utils'
 
 const styles = theme => ({
-  chip: {
-    margin: theme.spacing(1),
-    alignSelf: 'center',
-  },
   box: {
     width: '100%',
     textAlign: 'center',
@@ -22,13 +18,11 @@ const styles = theme => ({
     // flexWrap: 'wrap',
   },
   chipsOptions: {
-    width: '100%',
-    textAlign: 'center',
-    display: 'flex',
-    flexWrap: 'wrap',
-  },
-  iconButton: {
     alignSelf: 'center',
+    width: '100%',
+    textAlign: 'left',
+    display: ({ loading }) => (loading ? 'flex' : 'block'),
+    flexWrap: 'wrap',
   },
   divider: {
     // height: 28,
@@ -37,8 +31,14 @@ const styles = theme => ({
     margin: '4px',
     width: '1px',
   },
+  chip: {
+    marginRight: theme.spacing(1),
+    marginBottom: theme.spacing(0.5),
+    alignSelf: 'center',
+  },
   chipSkeleton: {
-    margin: theme.spacing(1),
+    marginRight: theme.spacing(1),
+    marginBottom: theme.spacing(0.5),
     alignSelf: 'center',
     backgroundColor: `${theme.palette.primary.light}80`,
     borderRadius: 16,
@@ -56,16 +56,23 @@ const styles = theme => ({
 })
 
 export default function ChipAreaPicker(props) {
-  const classes = useMultiStyles(styles)
-  const { handleChipClick, userAreaOptions, onEnterEditMode, loading } = props
+  const classes = useMultiStyles(styles, props)
+  const { handleChipClick, userAreaOptions, loading } = props
   // const icons = [<LocationCityIcon />, <TerrainIcon />, <MapIcon />, <Edit />, <Cancel />]
   const icons = [<DirectionsBike />, <DirectionsCar />, <Train />, <Flight />, <Edit />, <Cancel />]
+  const chipSkeletonWidths = [128, 220, 180]
   return (
     <Box className={classes.box}>
       <div className={classes.chipsOptions}>
         {loading
           ? [...Array(3)].map((x, i) => (
-              <Skeleton key={i} variant="rect" width={128} height={32} className={classes.chipSkeleton} />
+              <Skeleton
+                key={i}
+                variant="rect"
+                width={chipSkeletonWidths[i]}
+                height={32}
+                className={classes.chipSkeleton}
+              />
             ))
           : userAreaOptions.map(o => (
               <Chip
@@ -79,30 +86,6 @@ export default function ChipAreaPicker(props) {
               />
             ))}
       </div>
-      {loading ? (
-        <Skeleton variant="rect" width={1} className={classes.dividerSkeleton} />
-      ) : (
-        <Divider className={classes.divider} orientation="vertical" />
-      )}
-      {loading
-        ? [
-            <Skeleton key={0} variant="circle" width={40} height={40} className={classes.fabSkeleton} />,
-            // <Skeleton key={1} variant="circle" width={40} height={40} className={classes.fabSkeleton} />,
-          ]
-        : [
-            <div className={classes.iconButton}>
-              <Fab
-                key="editAddress"
-                // clickable
-                onClick={() => onEnterEditMode()}
-                className={classes.chip}
-                color="primary"
-                size="small"
-              >
-                {icons[icons.length - 2]} {/* // The last element is the "go back to edit" button... */}
-              </Fab>
-            </div>,
-          ]}
     </Box>
   )
 }
@@ -115,6 +98,5 @@ ChipAreaPicker.propTypes = {
     state: PropTypes.string,
   }),
   userAreaOptions: PropTypes.array,
-  onEnterEditMode: PropTypes.func,
   loading: PropTypes.bool,
 }
