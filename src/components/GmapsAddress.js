@@ -383,12 +383,13 @@ class GmapsAddress extends Component {
     }))
   }
 
-  handleAreaChangeOnMapWindow = (areaId, updatedPolygon) => {
+  handleAreaChangeOnMapWindow = (areaId, updatedPolygon, isValid) => {
     this.setState(prev => {
       const changedArea = prev.currentAreaSelection[areaId]
       const areaUpdate = {
         ...changedArea,
         polygon: updatedPolygon,
+        isValid,
       }
 
       let addedUserAreaUpdate = {}

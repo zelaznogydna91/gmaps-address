@@ -17,14 +17,39 @@ class PolyRefMap {
     if (!this[id]) this[id] = createRef()
     return this[id]
   }
+
+  toArray = () => Object.keys(this).filter(k => this[k].current)
+}
+
+// working with area/boundary react refs
+function isAreaWithinBounds(boundaries, area) {
+  for (let bId = 0; bId < boundaries; bId += 1) {
+    const boundaryPolyRef = boundaries.getById(bId)
+    const boundaryPolyInst = getGmapsPolygonInstance(boundaryPolyRef)
+    if (area.getPath().g.every(point => google.maps.geometry.poly.containsLocation(point, boundaryPolyInst))) {
+      return true
+    }
+  }
+  return false
 }
 
 export default withGoogleMap(props => {
-  const { mapViewport } = props
+  const { boundaries, areas, mapViewport, mapPosition } = props
   const mapRef = useRef()
-  const polyRefs = useRef(new PolyRefMap())
+  const boundaryPolyRefs = useRef(new PolyRefMap())
+  const areaPolyRefs = useRef(new PolyRefMap())
 
   const markerRef = useRef()
+
+  // useEffect(() => {
+  //   const
+
+  //   const validArea =
+  //     !boundaryPolyRefs.current.toArray().length ||
+  //     isAreaWithinBounds(boundaryPolyRefs.current.toArray(), areaPolyRef.current)
+
+  //   props.onAreaChange(areaId, areaPolyCoords, validArea)
+  // }, [areas])
 
   useEffect(() => {
     if (!isEmpty(mapViewport)) {
@@ -36,7 +61,7 @@ export default withGoogleMap(props => {
   useEffect(() => {
     const marker = getGmapsMarkerInstance(markerRef)
     if (marker) marker.setAnimation(MarkerAnimations.SMALL_DROP)
-  }, [props.mapPosition])
+  }, [mapPosition])
 
   function updateAreaPolyOnVertexRemove(areaId, vertexId) {
     if (props.areas[areaId].polygon.length === 3) {
@@ -56,15 +81,16 @@ export default withGoogleMap(props => {
     }
   }
 
-  function updateAreaPolyOnVertexAdditionOrDrag(areaId, point) {
-    const polyRef = polyRefs.current.getById(areaId)
-    const poly = polyRef.current.getPath().g.map(x => ({ lat: x.lat(), lng: x.lng() }))
+  function updateAreaPolyOnVertexAdditionOrDrag(areaId) {
+    // , point) {
+    const areaPolyRef = areaPolyRefs.current.getById(areaId)
+    const areaPolyCoords = areaPolyRef.current.getPath().g.map(x => ({ lat: x.lat(), lng: x.lng() }))
 
-    const polyInst = getGmapsPolygonInstance(polyRef)
-    if (polyInst) {
-      const result = google.maps.geometry.poly.containsLocation(point, polyInst)
-    }
-    props.onAreaChange(areaId, poly)
+    const validArea =
+      !boundaryPolyRefs.current.toArray().length ||
+      isAreaWithinBounds(boundaryPolyRefs.current.toArray(), areaPolyRef.current)
+
+    props.onAreaChange(areaId, areaPolyCoords, validArea)
   }
 
   function handleMouseUp(areaId) {
@@ -88,7 +114,7 @@ export default withGoogleMap(props => {
   return (
     <GoogleMap ref={mapRef} google={props.google} center={props.mapPosition} onClick={ev => onMarkerDragEnd(ev)}>
       {props.boundaries &&
-        props.boundaries.map(b => (
+        props.boundaries.map((b, id) => (
           <Polygon
             key={b.caption}
             path={b.polygon}
@@ -100,6 +126,7 @@ export default withGoogleMap(props => {
               fillOpacity: 0.05,
               fillColor: 'lime',
             }}
+            ref={boundaryPolyRefs.current.getById(id)}
           />
         ))}
       {props.areas &&
@@ -116,7 +143,7 @@ export default withGoogleMap(props => {
               fillOpacity: 0.05,
             }}
             onRightClick={handleRightClick(id)}
-            ref={polyRefs.current.getById(id)}
+            ref={areaPolyRefs.current.getById(id)}
             onMouseUp={handleMouseUp(id)}
           />
         ))}
