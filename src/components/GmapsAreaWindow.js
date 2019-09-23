@@ -9,9 +9,9 @@ import {
   // InfoWindow,
   Marker,
 } from 'react-google-maps'
-import { getGmapsMarkerInstance, getGmapsPolygonInstance, MarkerAnimations } from './WithGoogleApi'
+import { getGmapsMarkerInstance, MarkerAnimations } from './utils'
 
-const polyColors = ['rebeccapurple', 'fuchsia', 'aqua', 'darkkhaki', 'lightsalmon', 'hotpink', 'brown']
+const polyColors = ['rebeccapurple', 'fuchsia', 'cadetblue', 'darkkhaki', 'lightsalmon', 'hotpink', 'brown']
 class PolyRefMap {
   getById = id => {
     if (!this[id]) this[id] = createRef()
@@ -19,18 +19,6 @@ class PolyRefMap {
   }
 
   toArray = () => Object.keys(this).filter(k => this[k].current)
-}
-
-// working with area/boundary react refs
-function isAreaWithinBounds(boundaries, area) {
-  for (let bId = 0; bId < boundaries; bId += 1) {
-    const boundaryPolyRef = boundaries.getById(bId)
-    const boundaryPolyInst = getGmapsPolygonInstance(boundaryPolyRef)
-    if (area.getPath().g.every(point => google.maps.geometry.poly.containsLocation(point, boundaryPolyInst))) {
-      return true
-    }
-  }
-  return false
 }
 
 export default withGoogleMap(props => {
@@ -41,16 +29,6 @@ export default withGoogleMap(props => {
 
   const markerRef = useRef()
 
-  // useEffect(() => {
-  //   const
-
-  //   const validArea =
-  //     !boundaryPolyRefs.current.toArray().length ||
-  //     isAreaWithinBounds(boundaryPolyRefs.current.toArray(), areaPolyRef.current)
-
-  //   props.onAreaChange(areaId, areaPolyCoords, validArea)
-  // }, [areas])
-
   useEffect(() => {
     if (!isEmpty(mapViewport)) {
       const latlngBounds = new google.maps.LatLngBounds(mapViewport.sw, mapViewport.ne)
@@ -59,7 +37,7 @@ export default withGoogleMap(props => {
   }, [mapViewport])
 
   useEffect(() => {
-    const marker = getGmapsMarkerInstance(markerRef)
+    const marker = getGmapsMarkerInstance(markerRef.current)
     if (marker) marker.setAnimation(MarkerAnimations.SMALL_DROP)
   }, [mapPosition])
 
@@ -86,11 +64,7 @@ export default withGoogleMap(props => {
     const areaPolyRef = areaPolyRefs.current.getById(areaId)
     const areaPolyCoords = areaPolyRef.current.getPath().g.map(x => ({ lat: x.lat(), lng: x.lng() }))
 
-    const validArea =
-      !boundaryPolyRefs.current.toArray().length ||
-      isAreaWithinBounds(boundaryPolyRefs.current.toArray(), areaPolyRef.current)
-
-    props.onAreaChange(areaId, areaPolyCoords, validArea)
+    props.onAreaChange(areaId, areaPolyCoords)
   }
 
   function handleMouseUp(areaId) {
@@ -102,12 +76,12 @@ export default withGoogleMap(props => {
   }
 
   const onMarkerDragStart = () => {
-    const marker = getGmapsMarkerInstance(markerRef)
+    const marker = getGmapsMarkerInstance(markerRef.current)
     if (marker) marker.setAnimation(MarkerAnimations.BOUNCE)
   }
   const onMarkerDragEnd = event => {
     props.onMarkerDragEnd(event)
-    const marker = getGmapsMarkerInstance(markerRef)
+    const marker = getGmapsMarkerInstance(markerRef.current)
     if (marker) marker.setAnimation(MarkerAnimations.SMALL_DROP)
   }
 
@@ -138,8 +112,8 @@ export default withGoogleMap(props => {
             options={{
               clickable: true,
               strokeWeight: 2,
-              strokeColor: polyColors[id % 7],
-              fillColor: polyColors[id % 7],
+              strokeColor: area.isValid ? polyColors[id % 7] : 'red',
+              fillColor: area.isValid ? polyColors[id % 7] : 'red',
               fillOpacity: 0.05,
             }}
             onRightClick={handleRightClick(id)}

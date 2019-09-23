@@ -1,21 +1,21 @@
 import React, { useRef, useEffect } from 'react'
 import { withGoogleMap, GoogleMap, Marker } from 'react-google-maps'
-import { getGmapsMarkerInstance, MarkerAnimations } from './WithGoogleApi'
+import { getGmapsMarkerInstance, MarkerAnimations } from './utils'
 
 export default withGoogleMap(props => {
   const markerRef = useRef()
   useEffect(() => {
-    const marker = getGmapsMarkerInstance(markerRef)
+    const marker = getGmapsMarkerInstance(markerRef.current)
     if (marker) marker.setAnimation(MarkerAnimations.SMALL_DROP)
   }, [props.mapPosition])
 
   const onMarkerDragStart = () => {
-    const marker = getGmapsMarkerInstance(markerRef)
+    const marker = getGmapsMarkerInstance(markerRef.current)
     if (marker) marker.setAnimation(MarkerAnimations.BOUNCE)
   }
   const onMarkerDragEnd = event => {
     props.onMarkerDragEnd(event)
-    const marker = getGmapsMarkerInstance(markerRef)
+    const marker = getGmapsMarkerInstance(markerRef.current)
     if (marker) marker.setAnimation(MarkerAnimations.SMALL_DROP)
   }
   return (

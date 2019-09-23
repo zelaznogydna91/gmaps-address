@@ -17,7 +17,14 @@ import GmapsAutocomplete from './GmapsAutocomplete'
 import ChipAreaSelect from './ChipAreaSelect'
 import ChipAreaPicker from './ChipAreaPicker'
 import GmapsAreaWindow from './GmapsAreaWindow'
-import { validLocation, validArea, getMapViewportFromAreas, getStreetAddrPartsFromGeoResult, sameAreas } from './utils'
+import {
+  validLocation,
+  validArea,
+  getMapViewportFromAreas,
+  getStreetAddrPartsFromGeoResult,
+  sameAreas,
+  isAreaWithinBounds,
+} from './utils'
 
 Geocode.enableDebug()
 const styles = theme => ({
@@ -28,7 +35,7 @@ const styles = theme => ({
 
   divider: {
     height: '80%',
-    margin: '4px',
+    margin: '0px 8px 0px 8px',
     width: '1px',
     alignSelf: 'end',
   },
@@ -43,9 +50,9 @@ const styles = theme => ({
   },
   fab: {
     alignSelf: 'center',
-
     height: '36px',
     width: '36px',
+    boxShadow: '0px 0px 0px 0px #00000000, 0px 0px 0px 0px #00000000, 0px 0px 0px 0px #00000000',
   },
 })
 
@@ -141,7 +148,14 @@ class GmapsAddress extends Component {
   getStateFromProps = async props => {
     // AREA MODE
     if (props.areaMode) {
-      const currentAreaSelection = ((Array.isArray(props.value) && props.value) || []).filter(x => validArea(x))
+      let currentAreaSelection = ((Array.isArray(props.value) && props.value) || []).filter(x => validArea(x))
+      debugger
+      const boundaryPolygons = (props.boundaries || []).map(b => b.polygon)
+      currentAreaSelection = currentAreaSelection.map(area => ({
+        ...area,
+        isValid: !boundaryPolygons.length || isAreaWithinBounds(boundaryPolygons, area.polygon),
+      }))
+
       return { currentAreaSelection, addedUserAreas: currentAreaSelection }
     }
 
@@ -221,12 +235,16 @@ class GmapsAddress extends Component {
     const geoCodeResp = await Geocode.fromLatLng(latValue, lngValue)
 
     const userAreaOptions = this.getUserAreaOptionsFromGeocodeResponse(placeAddress, geoCodeResp)
+
+    console.log('userAreaOptions', userAreaOptions)
+
     this.setState({
       userAreaOptions,
       address: userAreaOptions[0].caption,
       markerPosition: userAreaOptions[0].heart,
       mapPosition: userAreaOptions[0].heart,
       showChipAreaPicker: true,
+      loadingUserAreaOptions: false,
     })
   }
 
@@ -291,12 +309,18 @@ class GmapsAddress extends Component {
       currentLocation = currentLocation || (await this.captureCurrentLocationFromNavigator()) || TheHeartOfKendall
       currentLocationSetting = {
         currentLocation,
-        markerPosition: currentLocation,
         mapFirstShowing: false,
       }
     }
-
-    this.setState(currentLocationSetting)
+    this.setState(prev => ({
+      ...currentLocationSetting,
+      ...(prev.address !== undefined
+        ? {}
+        : {
+            mapPosition: currentLocationSetting.currentLocation,
+            markerPosition: currentLocationSetting.currentLocation,
+          }),
+    }))
   }
 
   handleAreaSelection = updatedAreaSelection => {
@@ -309,11 +333,11 @@ class GmapsAddress extends Component {
   }
 
   handleAddNewArea = async () => {
-    this.setState({
+    this.setState(prev => ({
       showChipAreaSelect: false,
       showChipAreaPicker: true,
-      loadingUserAreaOptions: true,
-    })
+      loadingUserAreaOptions: prev.userAreaOptions === null,
+    }))
 
     // using cached or capture current location ..
     let { currentLocation } = this.state
@@ -324,7 +348,7 @@ class GmapsAddress extends Component {
     }
 
     let areaOptionsFromCurrentLocation = {}
-    if (!isEmpty(currentLocation)) {
+    if (!isEmpty(currentLocation) && !this.state.userAreaOptions) {
       const { lat, lng } = currentLocation
       const geoCodeResp = await Geocode.fromLatLng(lat, lng)
       const addressDetails = getStreetAddrPartsFromGeoResult(geoCodeResp.results[0])
@@ -383,9 +407,12 @@ class GmapsAddress extends Component {
     }))
   }
 
-  handleAreaChangeOnMapWindow = (areaId, updatedPolygon, isValid) => {
+  handleAreaChangeOnMapWindow = (areaId, updatedPolygon) => {
     this.setState(prev => {
       const changedArea = prev.currentAreaSelection[areaId]
+      debugger
+      const boundaryPolygons = (this.props.boundaries || []).map(b => b.polygon)
+      const isValid = !boundaryPolygons.length || isAreaWithinBounds(boundaryPolygons, updatedPolygon)
       const areaUpdate = {
         ...changedArea,
         polygon: updatedPolygon,
@@ -542,7 +569,7 @@ class GmapsAddress extends Component {
             <GmapsAreaWindow
               areas={currentAreaSelection}
               boundaries={boundaries}
-              containerElement={<div style={{ height: this.props.height }} />}
+              containerElement={<div style={this.props.gmapsWindowStyle} />}
               mapElement={<div style={{ height: '100%' }} />}
               mapPosition={mapPosition}
               markerPosition={markerPosition}
@@ -552,15 +579,17 @@ class GmapsAddress extends Component {
               zoom={this.props.zoom}
               mapViewport={mapViewport}
               showMarker={!showChipAreaSelect}
+              className={classes.gmapsWindow}
             />
           ) : (
             <GmapsWindow
-              containerElement={<div style={{ height: this.props.height }} />}
+              containerElement={<div style={this.props.gmapsWindowStyle} />}
               mapElement={<div style={{ height: '100%' }} />}
               mapPosition={mapPosition}
               markerPosition={markerPosition}
               onMarkerDragEnd={this.handleMarkerDragEnd}
               zoom={this.props.zoom}
+              className={classes.gmapsWindow}
             />
           ))}
       </div>
@@ -571,7 +600,7 @@ class GmapsAddress extends Component {
 GmapsAddress.propTypes = {
   apiKey: PropTypes.string,
   areaMode: PropTypes.bool,
-  height: PropTypes.string,
+  gmapsWindowStyle: PropTypes.object,
   zoom: PropTypes.number,
   inputComponent: PropTypes.elementType,
   inputProps: PropTypes.object,
@@ -588,7 +617,10 @@ GmapsAddress.propTypes = {
 
 GmapsAddress.defaultProps = {
   areaMode: false,
-  height: '600px',
+  gmapsWindowStyle: {
+    height: '600px',
+    margin: '16px 0px 0px 0px',
+  },
   zoom: 15,
   inputComponent: GmapsAddressInput,
   inputProps: {},

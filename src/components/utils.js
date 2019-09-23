@@ -1,3 +1,4 @@
+/* global google */
 import { makeStyles, useTheme } from '@material-ui/core/styles'
 import isNumber from 'lodash/isNumber'
 import roundNumber from 'lodash/round'
@@ -87,4 +88,41 @@ export const sameAreas = (a1, a2) => {
     if (!equalCoords(p1[i1], p2[(i2 + i1) % p1.length])) return false
   }
   return true
+}
+
+// common stuffs
+const SECRET_MARKER_KEY = '__SECRET_MARKER_DO_NOT_USE_OR_YOU_WILL_BE_FIRED'
+const SECRET_POLYGON_KEY = '__SECRET_POLYGON_DO_NOT_USE_OR_YOU_WILL_BE_FIRED'
+export const MarkerAnimations = {
+  get BOUNCE() {
+    return google.maps.Animation.BOUNCE
+  },
+  get SMALL_DROP() {
+    return google.maps.Animation.Vm
+  },
+  get DROP() {
+    return google.maps.Animation.DROP
+  },
+  get RARITA() {
+    return google.maps.Animation.Xm
+  },
+}
+export const getGmapsMarkerInstance = markerComponent => markerComponent && markerComponent.state[SECRET_MARKER_KEY]
+export const getGmapsPolygonInstance = polygonComponent =>
+  polygonComponent && polygonComponent.state[SECRET_POLYGON_KEY]
+
+// working with area/boundary polygon react components
+export function isAreaWithinBounds(boundaryPolygons, areaPolygon) {
+  for (let bId = 0; bId < boundaryPolygons.length; bId += 1) {
+    const gmapsBoundaryPoly = google.maps.Polygon({ paths: boundaryPolygons[bId] })
+    if (
+      areaPolygon.every(coords => {
+        const latLng = google.maps.LatLng(coords.lat, coords.lng)
+        return google.maps.geometry.poly.containsLocation(latLng, gmapsBoundaryPoly)
+      })
+    ) {
+      return true
+    }
+  }
+  return false
 }

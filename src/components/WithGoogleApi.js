@@ -41,25 +41,3 @@ export function withGmapsContext(BaseComp) {
   comp.displayName = 'WithGmapsContext'
   return comp
 }
-
-// common stuffs
-const SECRET_MARKER_KEY = '__SECRET_MARKER_DO_NOT_USE_OR_YOU_WILL_BE_FIRED'
-const SECRET_POLYGON_KEY = '__SECRET_POLYGON_DO_NOT_USE_OR_YOU_WILL_BE_FIRED'
-export const MarkerAnimations = {
-  get BOUNCE() {
-    return google.maps.Animation.BOUNCE
-  },
-  get SMALL_DROP() {
-    return google.maps.Animation.Vm
-  },
-  get DROP() {
-    return google.maps.Animation.DROP
-  },
-  get RARITA() {
-    return google.maps.Animation.Xm
-  },
-}
-export const getGmapsMarkerInstance = markerComponentRef =>
-  markerComponentRef.current && markerComponentRef.current.state[SECRET_MARKER_KEY]
-export const getGmapsPolygonInstance = polygonComponentRef =>
-  polygonComponentRef.current && polygonComponentRef.current.state[SECRET_POLYGON_KEY]

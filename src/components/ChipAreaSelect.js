@@ -50,11 +50,11 @@ const MenuProps = {
   },
 }
 
-function getStyles(value, list, theme) {
-  return {
-    fontWeight: list.indexOf(value) === -1 ? theme.typography.fontWeightRegular : theme.typography.fontWeightMedium,
-  }
-}
+// function getStyles(value, list, theme) {
+//   return {
+//     fontWeight: list.indexOf(value) === -1 ? theme.typography.fontWeightRegular : theme.typography.fontWeightMedium,
+//   }
+// }
 
 export default function ChipAreaSelect(props) {
   const classes = useStyles()
@@ -105,7 +105,7 @@ export default function ChipAreaSelect(props) {
             key="addNewAreaAction"
             value="addNewAreaAction"
             style={{
-              fontWeight: theme.typography.fontWeightMedium,
+              // fontWeight: theme.typography.fontWeightMedium,
               fontStyle: 'italic',
             }}
           >
@@ -120,7 +120,7 @@ export default function ChipAreaSelect(props) {
               <MenuItem
                 key={id}
                 value={area}
-                style={getStyles(area.caption, currentSelection.map(x => x.caption), theme)}
+                // style={getStyles(area.caption, currentSelection.map(x => x.caption), theme)}
               >
                 {`${area.caption}`}
               </MenuItem>
@@ -134,7 +134,7 @@ export default function ChipAreaSelect(props) {
               <MenuItem
                 key={id}
                 value={area}
-                style={getStyles(area.caption, currentSelection.map(x => x.caption), theme)}
+                // style={getStyles(area.caption, currentSelection.map(x => x.caption), theme)}
               >
                 {`${area.caption} (${area.area})`}
               </MenuItem>
