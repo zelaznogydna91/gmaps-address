@@ -112,12 +112,13 @@ export const getGmapsPolygonInstance = polygonComponent =>
   polygonComponent && polygonComponent.state[SECRET_POLYGON_KEY]
 
 // working with area/boundary polygon react components
-export function isAreaWithinBounds(boundaryPolygons, areaPolygon) {
+export const isAreaWithinBounds = (boundaryPolygons, areaPolygon) => {
+  console.log('validating poly', boundaryPolygons, areaPolygon)
   for (let bId = 0; bId < boundaryPolygons.length; bId += 1) {
-    const gmapsBoundaryPoly = google.maps.Polygon({ paths: boundaryPolygons[bId] })
+    const gmapsBoundaryPoly = new google.maps.Polygon({ paths: boundaryPolygons[bId] })
     if (
       areaPolygon.every(coords => {
-        const latLng = google.maps.LatLng(coords.lat, coords.lng)
+        const latLng = new google.maps.LatLng(coords.lat, coords.lng)
         return google.maps.geometry.poly.containsLocation(latLng, gmapsBoundaryPoly)
       })
     ) {

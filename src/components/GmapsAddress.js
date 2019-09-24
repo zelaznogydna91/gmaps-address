@@ -121,7 +121,7 @@ class GmapsAddress extends Component {
         let mapUpdates = {}
         if (
           this.props.areaMode &&
-          (isEmpty(newState.currentAreaSelection) && isEmpty(this.props.boundaries)) === false
+          (isEmpty(newState.currentAreaSelection) === false || isEmpty(this.props.boundaries) === false)
         ) {
           const mapViewport = getMapViewportFromAreas([
             ...newState.currentAreaSelection,
@@ -149,13 +149,14 @@ class GmapsAddress extends Component {
     // AREA MODE
     if (props.areaMode) {
       let currentAreaSelection = ((Array.isArray(props.value) && props.value) || []).filter(x => validArea(x))
-      debugger
       const boundaryPolygons = (props.boundaries || []).map(b => b.polygon)
-      currentAreaSelection = currentAreaSelection.map(area => ({
-        ...area,
-        isValid: !boundaryPolygons.length || isAreaWithinBounds(boundaryPolygons, area.polygon),
-      }))
-
+      currentAreaSelection = currentAreaSelection.map(area => {
+        const isValid = !boundaryPolygons.length || isAreaWithinBounds(boundaryPolygons, area.polygon)
+        return {
+          ...area,
+          isValid,
+        }
+      })
       return { currentAreaSelection, addedUserAreas: currentAreaSelection }
     }
 
@@ -410,7 +411,6 @@ class GmapsAddress extends Component {
   handleAreaChangeOnMapWindow = (areaId, updatedPolygon) => {
     this.setState(prev => {
       const changedArea = prev.currentAreaSelection[areaId]
-      debugger
       const boundaryPolygons = (this.props.boundaries || []).map(b => b.polygon)
       const isValid = !boundaryPolygons.length || isAreaWithinBounds(boundaryPolygons, updatedPolygon)
       const areaUpdate = {
