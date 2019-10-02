@@ -23,6 +23,8 @@ import {
   getMapViewportFromAreas,
   getStreetAddrPartsFromGeoResult,
   sameAreas,
+  // getGmapsPolygon,
+  // pointIsWithinGmapsPolygon,
   isAreaWithinBounds,
 } from './utils'
 
@@ -145,18 +147,25 @@ class GmapsAddress extends Component {
 
   dataJustLoaded = (prevData, newData, key) => prevData[key] === undefined && newData[key] !== undefined
 
+  validateAreasInBoundaries = (areas, boundaries) => {
+    if (!boundaries.length) return areas.map(area => ({ ...area, isValid: true }))
+    const boundaryPolygons = boundaries.map(b => b.polygon)
+    return areas.map(area => {
+      const isValid = isAreaWithinBounds(boundaryPolygons, area.polygon)
+      return {
+        ...area,
+        isValid,
+      }
+    })
+  }
+
   getStateFromProps = async props => {
     // AREA MODE
     if (props.areaMode) {
-      let currentAreaSelection = ((Array.isArray(props.value) && props.value) || []).filter(x => validArea(x))
-      const boundaryPolygons = (props.boundaries || []).map(b => b.polygon)
-      currentAreaSelection = currentAreaSelection.map(area => {
-        const isValid = !boundaryPolygons.length || isAreaWithinBounds(boundaryPolygons, area.polygon)
-        return {
-          ...area,
-          isValid,
-        }
-      })
+      const currentAreaSelection = this.validateAreasInBoundaries(
+        ((Array.isArray(props.value) && props.value) || []).filter(x => validArea(x)),
+        props.boundaries
+      )
       return { currentAreaSelection, addedUserAreas: currentAreaSelection }
     }
 
@@ -204,6 +213,12 @@ class GmapsAddress extends Component {
     }))
   }
 
+  // handleHeartDragEnd = (areaId, newHeart) => {
+  //   this.updateArea(areaId, {
+  //     heart: newHeart,
+  //   })
+  // }
+
   saveInStateStreetAddressDetails = (newLat, newLng, addressDetails, updateMapPos) => {
     const location = { lat: newLat, lng: newLng }
     this.setState({
@@ -236,8 +251,6 @@ class GmapsAddress extends Component {
     const geoCodeResp = await Geocode.fromLatLng(latValue, lngValue)
 
     const userAreaOptions = this.getUserAreaOptionsFromGeocodeResponse(placeAddress, geoCodeResp)
-
-    console.log('userAreaOptions', userAreaOptions)
 
     this.setState({
       userAreaOptions,
@@ -371,15 +384,19 @@ class GmapsAddress extends Component {
     const existing = this.state.addedUserAreas
     for (let i = 1; i < Number.MAX_VALUE; i += 1) {
       const name = `Area${i}`
+      console.log('getNextGenAreaName', name)
       if (!existing.some(x => x.caption === name)) return name
     }
     throw new Error("unbelievable ...\nshouldn't you have less areas?")
   }
 
   addNewUserArea = pickedOption => {
+    const isValid =
+      pickedOption.isBoundary || this.validateAreasInBoundaries([pickedOption], this.props.boundaries)[0].isValid
     let userAreaToAdd = {
-      ...pickProps(pickedOption, ['id', 'caption', 'area', 'heart', 'polygon']),
+      ...pickProps(pickedOption, ['caption', 'area', 'heart', 'polygon']),
       caption: this.getNextGenAreaName(),
+      isValid,
     }
     this.setState(prev => {
       let addedUserAreasUpdate = {}
@@ -402,39 +419,54 @@ class GmapsAddress extends Component {
     })
   }
 
-  handleAreaRemoveOnMapWindow = areaId => {
-    this.setState(prev => ({
+  handleAreaRemoveOnMapWindow = () => {
+    this.setState(() => ({
       currentAreaSelection: [], // prev.currentAreaSelection.filter((x, i) => i !== areaId),
     }))
   }
 
-  handleAreaChangeOnMapWindow = (areaId, updatedPolygon) => {
+  updateArea = (areaId, areaChanges) => {
     this.setState(prev => {
-      const changedArea = prev.currentAreaSelection[areaId]
-      const boundaryPolygons = (this.props.boundaries || []).map(b => b.polygon)
-      const isValid = !boundaryPolygons.length || isAreaWithinBounds(boundaryPolygons, updatedPolygon)
+      const changingArea = prev.currentAreaSelection[areaId]
       const areaUpdate = {
-        ...changedArea,
-        polygon: updatedPolygon,
-        isValid,
+        ...changingArea,
+        ...areaChanges,
       }
-
       let addedUserAreaUpdate = {}
       const changedAddedUserAreaIndex = prev.addedUserAreas.findIndex(
-        x => x === changedArea || (x.id > 0 && x.id === changedArea.id)
+        x => x === changingArea || (x.id > 0 && x.id === changingArea.id)
       )
-
       if (changedAddedUserAreaIndex > -1) {
         addedUserAreaUpdate = { addedUserAreas: [...prev.addedUserAreas] }
         addedUserAreaUpdate.addedUserAreas[changedAddedUserAreaIndex] = areaUpdate
       }
-
       const currentAreaSelectionUpdate = [...prev.currentAreaSelection]
       currentAreaSelectionUpdate[areaId] = areaUpdate
+
+      console.log('updateArea', addedUserAreaUpdate, currentAreaSelectionUpdate)
       return {
         ...addedUserAreaUpdate,
         currentAreaSelection: currentAreaSelectionUpdate,
       }
+    })
+  }
+
+  handleAreaChangeOnMapWindow = (areaId, areaChanges) => {
+    let polygonUpdate = {}
+    console.log('handleAreaChangeOnMapWindow', areaChanges)
+    if (areaChanges.polygon) {
+      const boundaryPolygons = (this.props.boundaries || []).map(b => b.polygon)
+      polygonUpdate = {
+        polygon: areaChanges.polygon,
+        isValid: !boundaryPolygons.length || isAreaWithinBounds(boundaryPolygons, areaChanges.polygon),
+      }
+    }
+    const heartUpdate = {}
+    if (areaChanges.heart) heartUpdate.heart = areaChanges.heart
+    console.log('handleAreaChangeOnMapWindow', polygonUpdate, heartUpdate)
+    this.updateArea(areaId, {
+      ...polygonUpdate,
+      ...heartUpdate,
     })
   }
 
@@ -567,19 +599,21 @@ class GmapsAddress extends Component {
         {showMap &&
           (areaMode ? (
             <GmapsAreaWindow
-              areas={currentAreaSelection}
               boundaries={boundaries}
+              areas={currentAreaSelection}
+              className={classes.gmapsWindow}
+              // onPolyClick={this.toggleAreaEdit(currentAreaSelection[id])}
               containerElement={<div style={this.props.gmapsWindowStyle} />}
               mapElement={<div style={{ height: '100%' }} />}
               mapPosition={mapPosition}
+              mapViewport={mapViewport}
               markerPosition={markerPosition}
               onAreaChange={this.handleAreaChangeOnMapWindow}
               onAreaRemove={this.handleAreaRemoveOnMapWindow}
               onMarkerDragEnd={this.handleMarkerDragEnd}
-              zoom={this.props.zoom}
-              mapViewport={mapViewport}
+              // onHeartDragEnd={this.handleHeartDragEnd}
               showMarker={!showChipAreaSelect}
-              className={classes.gmapsWindow}
+              zoom={this.props.zoom}
             />
           ) : (
             <GmapsWindow
@@ -617,6 +651,7 @@ GmapsAddress.propTypes = {
 
 GmapsAddress.defaultProps = {
   areaMode: false,
+  boundaries: [],
   gmapsWindowStyle: {
     height: '600px',
     margin: '16px 0px 0px 0px',

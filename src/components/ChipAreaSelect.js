@@ -1,5 +1,5 @@
 import React from 'react'
-import { makeStyles, useTheme } from '@material-ui/core/styles'
+import { makeStyles } from '@material-ui/core/styles'
 import Input from '@material-ui/core/Input'
 import InputLabel from '@material-ui/core/InputLabel'
 import MenuItem from '@material-ui/core/MenuItem'
@@ -22,9 +22,6 @@ const useStyles = makeStyles(theme => ({
     opacity: 'rgba(0, 0, 0, 0.8)',
   },
   formControl: {
-    // margin: theme.spacing(1),
-    // minWidth: 350,
-    // maxWidth: '100%',
     width: '100%',
   },
   chips: {
@@ -50,16 +47,8 @@ const MenuProps = {
   },
 }
 
-// function getStyles(value, list, theme) {
-//   return {
-//     fontWeight: list.indexOf(value) === -1 ? theme.typography.fontWeightRegular : theme.typography.fontWeightMedium,
-//   }
-// }
-
 export default function ChipAreaSelect(props) {
   const classes = useStyles()
-  const theme = useTheme()
-
   const { options, currentSelection, onChange, onAddNewArea } = props
 
   function addNewAreaActionWasSelected(selection) {
@@ -76,7 +65,9 @@ export default function ChipAreaSelect(props) {
   function handleDelete(value) {
     return () => onChange(currentSelection.filter(x => x !== value))
   }
-
+  console.log('options', options)
+  console.log('options[0].area', options[0].area)
+  // debugger
   return (
     <div className={classes.root}>
       <FormControl className={classes.formControl}>
@@ -105,37 +96,37 @@ export default function ChipAreaSelect(props) {
             key="addNewAreaAction"
             value="addNewAreaAction"
             style={{
-              // fontWeight: theme.typography.fontWeightMedium,
               fontStyle: 'italic',
             }}
           >
             <FormattedMessage {...messages.addNewArea} />
           </MenuItem>
-          <MenuItem value="" className={classes.selectorSection} disableGutters dense disabled>
-            <Typography variant="caption">&nbsp;&nbsp;From boundaries</Typography>
-          </MenuItem>
+          {/* ------------- FROM BOUNDARIES SEPARATOR */}
+          {options.some(a => a.isBoundary) && (
+            <MenuItem value="" className={classes.selectorSection} disableGutters dense disabled>
+              <Typography variant="caption">&nbsp;&nbsp;From boundaries</Typography>
+            </MenuItem>
+          )}
+
+          {/* ------------- USER AREAS */}
           {options
             .filter(a => a.isBoundary)
             .map((area, id) => (
-              <MenuItem
-                key={id}
-                value={area}
-                // style={getStyles(area.caption, currentSelection.map(x => x.caption), theme)}
-              >
+              <MenuItem key={id} value={area}>
                 {`${area.caption}`}
               </MenuItem>
             ))}
+
+          {/* ------------- USER AREAS SEPARATOR */}
           <MenuItem value="" className={classes.selectorSection} disableGutters dense disabled>
             <Typography variant="caption">&nbsp;&nbsp;User Areas</Typography>
           </MenuItem>
+
+          {/* ------------- USER AREAS */}
           {options
             .filter(a => !a.isBoundary)
             .map((area, id) => (
-              <MenuItem
-                key={id}
-                value={area}
-                // style={getStyles(area.caption, currentSelection.map(x => x.caption), theme)}
-              >
+              <MenuItem key={id} value={area}>
                 {`${area.caption} (${area.area})`}
               </MenuItem>
             ))}

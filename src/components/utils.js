@@ -75,20 +75,22 @@ export const getStreetAddrPartsFromGeoResult = geoResult => {
   }
 }
 
-const fixedNumber = n => roundNumber(n, 10)
-const equalCoords = (c1, c2) => c1.lat === c2.lat && c1.lng === c2.lng
+const fixedNumber = n => roundNumber(n, 6)
+export const equalCoords = (c1, c2) => c1.lat === c2.lat && c1.lng === c2.lng
 
-export const sameAreas = (a1, a2) => {
-  const p1 = a1.polygon.map(c => ({ lat: fixedNumber(c.lat), lng: fixedNumber(c.lng) }))
-  const p2 = a2.polygon.map(c => ({ lat: fixedNumber(c.lat), lng: fixedNumber(c.lng) }))
-  if (p1.length !== p2.length) return false
+export const samePolygons = (x, y) => {
+  const p1 = x.map(c => ({ lat: fixedNumber(c.lat), lng: fixedNumber(c.lng) }))
+  const p2 = y.map(c => ({ lat: fixedNumber(c.lat), lng: fixedNumber(c.lng) }))
+  if (p1.length !== p2.length) return -1
   const i2 = p2.findIndex(c => equalCoords(p1[0], c))
-  if (i2 < 0) return false
+  if (i2 < 0) return 0
   for (let i1 = 0; i1 < p1.length; i1 += 1) {
-    if (!equalCoords(p1[i1], p2[(i2 + i1) % p1.length])) return false
+    if (!equalCoords(p1[i1], p2[(i2 + i1) % p1.length])) return i1
   }
   return true
 }
+
+export const sameAreas = (a1, a2) => samePolygons(a1.polygon, a2.polygon) === true
 
 // common stuffs
 const SECRET_MARKER_KEY = '__SECRET_MARKER_DO_NOT_USE_OR_YOU_WILL_BE_FIRED'
@@ -98,32 +100,54 @@ export const MarkerAnimations = {
     return google.maps.Animation.BOUNCE
   },
   get SMALL_DROP() {
-    return google.maps.Animation.Vm
+    return 4 // google.maps.Animation.Vm
   },
   get DROP() {
     return google.maps.Animation.DROP
   },
   get RARITA() {
-    return google.maps.Animation.Xm
+    return 3 // google.maps.Animation.Xm
   },
 }
 export const getGmapsMarkerInstance = markerComponent => markerComponent && markerComponent.state[SECRET_MARKER_KEY]
 export const getGmapsPolygonInstance = polygonComponent =>
   polygonComponent && polygonComponent.state[SECRET_POLYGON_KEY]
 
+export const getGmapsPoint = point => new google.maps.LatLng(point.lat, point.lng)
+export const getGmapsPolygon = polygon => new google.maps.Polygon({ paths: polygon })
+
+export const pointIsWithinGmapsPolygon = (point, gmapsPolygon) => {
+  const gmapsPoint = getGmapsPoint(point)
+  return google.maps.geometry.poly.containsLocation(gmapsPoint, gmapsPolygon)
+}
+
 // working with area/boundary polygon react components
 export const isAreaWithinBounds = (boundaryPolygons, areaPolygon) => {
-  console.log('validating poly', boundaryPolygons, areaPolygon)
   for (let bId = 0; bId < boundaryPolygons.length; bId += 1) {
-    const gmapsBoundaryPoly = new google.maps.Polygon({ paths: boundaryPolygons[bId] })
-    if (
-      areaPolygon.every(coords => {
-        const latLng = new google.maps.LatLng(coords.lat, coords.lng)
-        return google.maps.geometry.poly.containsLocation(latLng, gmapsBoundaryPoly)
-      })
-    ) {
+    const gmapsBoundaryPoly = getGmapsPolygon(boundaryPolygons[bId])
+    if (areaPolygon.every(coords => pointIsWithinGmapsPolygon(coords, gmapsBoundaryPoly))) {
       return true
     }
   }
   return false
+}
+
+export function animate(animator, { rate = 10, steps = 10 } = {}) {
+  let position = 0
+  let cancel = false
+  const animation = () => {
+    if (position < 100 && !cancel) {
+      position += steps
+      animator(position / 100)
+      setTimeout(() => {
+        animation()
+      }, rate)
+    }
+  }
+  animation()
+  return {
+    cancel: () => {
+      cancel = true
+    },
+  }
 }

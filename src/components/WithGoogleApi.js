@@ -1,4 +1,3 @@
-/* global google */
 import React from 'react'
 import PropTypes from 'prop-types'
 import { withScriptjs } from 'react-google-maps'

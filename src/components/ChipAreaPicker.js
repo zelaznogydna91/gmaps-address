@@ -1,5 +1,5 @@
 import React from 'react'
-import { Chip, Box, Fab, Divider } from '@material-ui/core'
+import { Chip, Box } from '@material-ui/core'
 import Cancel from '@material-ui/icons/Clear'
 import DirectionsBike from '@material-ui/icons/DirectionsBike'
 import DirectionsCar from '@material-ui/icons/DirectionsCar'
