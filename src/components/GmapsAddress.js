@@ -12,7 +12,7 @@ import EditIcon from '@material-ui/icons/Edit'
 import MapIcon from '@material-ui/icons/Map'
 import { withGmapsContext } from './WithGoogleApi'
 import GmapsAddressInput from './GmapsAddressInput'
-import GmapsWindow from './GmapsWindow'
+// import GmapsWindow from './GmapsWindow'
 import GmapsAutocomplete from './GmapsAutocomplete'
 import ChipAreaSelect from './ChipAreaSelect'
 import ChipAreaPicker from './ChipAreaPicker'
@@ -26,7 +26,7 @@ import {
   isAreaWithinBounds,
 } from './utils'
 
-Geocode.enableDebug()
+// Geocode.enableDebug()
 const styles = theme => ({
   gmapsWindow: {
     marginTop: theme.spacing.unit * 1,
@@ -61,7 +61,11 @@ const TheHeartOfKendall = { lat: 25.678167, lng: -80.404497 }
 class GmapsAddress extends Component {
   constructor(props) {
     super(props)
-    Geocode.setApiKey(props.apiKey)
+    // eslint-disable-next-line react/prop-types
+    if (!props.withGmapsScripts) {
+      throw new Error('Need outter WithGoogleApi component, with your own api key as prop.')
+    }
+    // Geocode.setApiKey(props.apiKey)
 
     this.state = {
       address: undefined,
@@ -168,9 +172,8 @@ class GmapsAddress extends Component {
    *
    * @param event
    */
-  handleMarkerDragEnd = async event => {
-    const newLat = event.latLng.lat()
-    const newLng = event.latLng.lng()
+  handleMarkerDragEnd = async newPosition => {
+    const { lat: newLat, lng: newLng } = newPosition
     this.setState({
       markerPosition: { lat: newLat, lng: newLng },
     })
@@ -391,9 +394,9 @@ class GmapsAddress extends Component {
     })
   }
 
-  handleAreaRemoveOnMapWindow = () => {
-    this.setState(() => ({
-      currentAreaSelection: [], // prev.currentAreaSelection.filter((x, i) => i !== areaId),
+  handleAreaRemoveOnMapWindow = areaId => {
+    this.setState(prev => ({
+      currentAreaSelection: [...prev.currentAreaSelection.filter((x, i) => i !== areaId)], // ,
     }))
   }
 
@@ -564,24 +567,39 @@ class GmapsAddress extends Component {
           {/* ---------------------------------------- */}
         </div>
         {/* Showing the map... */}
-        {showMap &&
+        {showMap && (
+          <GmapsAreaWindow
+            // boundaries={boundaries}
+            // showErrors
+            areas={currentAreaSelection}
+            mapViewport={mapViewport}
+            mapPosition={mapPosition}
+            markerPosition={markerPosition}
+            onAreaChange={this.handleAreaChangeOnMapWindow}
+            onAreaRemove={this.handleAreaRemoveOnMapWindow}
+            onMarkerDragEnd={this.handleMarkerDragEnd}
+            editableMarker
+            showMarker
+            zoom={this.props.zoom}
+            className={classes.gmapsWindow}
+          />
+        )}
+        {/* {showMap &&
           (areaMode ? (
             <GmapsAreaWindow
-              boundaries={boundaries}
-              areas={currentAreaSelection}
-              className={classes.gmapsWindow}
-              // onPolyClick={this.toggleAreaEdit(currentAreaSelection[id])}
               containerElement={<div style={this.props.gmapsWindowStyle} />}
               mapElement={<div style={{ height: '100%' }} />}
-              mapPosition={mapPosition}
+              boundaries={boundaries}
+              areas={currentAreaSelection}
               mapViewport={mapViewport}
+              mapPosition={mapPosition}
               markerPosition={markerPosition}
               onAreaChange={this.handleAreaChangeOnMapWindow}
               onAreaRemove={this.handleAreaRemoveOnMapWindow}
               onMarkerDragEnd={this.handleMarkerDragEnd}
-              // onHeartDragEnd={this.handleHeartDragEnd}
               showMarker={!showChipAreaSelect}
               zoom={this.props.zoom}
+              className={classes.gmapsWindow}
             />
           ) : (
             <GmapsWindow
@@ -593,7 +611,7 @@ class GmapsAddress extends Component {
               zoom={this.props.zoom}
               className={classes.gmapsWindow}
             />
-          ))}
+          ))} */}
       </div>
     )
   }

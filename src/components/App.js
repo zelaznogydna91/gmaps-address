@@ -3,9 +3,11 @@
  */
 import React, { useState } from 'react'
 import { Paper, withStyles, Typography } from '@material-ui/core'
-import GmapsAddress from './GmapsAddress'
 import WithGoogleApi from './WithGoogleApi'
+import GmapsAddress from './GmapsAddress'
+import GmapsAreaWindow from './GmapsAreaWindow'
 import LanguageProvider from './LanguageProvider'
+import { getMapViewportFromAreas } from './utils'
 
 const GOOGLE_API_KEY = 'AIzaSyC43U2-wqXxYEk1RBrTLdkYt3aDoOxO4Fw'
 /**
@@ -123,6 +125,28 @@ const App = withStyles(styles)(props => {
               <GmapsAddress className={classes.component} value={streetAddr} onChange={setStreetAddr} />
             </div>
           )}
+          <>
+            <br />
+            <Typography className={classes.sections}>MAP WINDOW</Typography>
+            <GmapsAreaWindow
+              containerElement={<div style={{ height: '400px' }} />}
+              mapElement={<div style={{ height: '100%' }} />}
+              // boundaries={boundaries}
+              // showErrors
+              areas={serviceAreas}
+              // editableAreas
+              mapViewport={getMapViewportFromAreas(serviceAreas)}
+              mapPosition={serviceAreas[0].heart}
+              markerPosition={serviceAreas[0].heart}
+              // onAreaChange={this.handleAreaChangeOnMapWindow}
+              // onAreaRemove={this.handleAreaRemoveOnMapWindow}
+              // onMarkerDragEnd={this.handleMarkerDragEnd}
+              // editableMarker
+              // showMarker
+              // zoom={15}
+              onAreaClick={area => alert(area.caption)}
+            />
+          </>
         </WithGoogleApi>
       </LanguageProvider>
     </Paper>

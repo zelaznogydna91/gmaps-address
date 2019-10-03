@@ -1,4 +1,5 @@
 /* global google */
+import PropTypes from 'prop-types'
 import isEmpty from 'lodash/isEmpty'
 import React, { useRef, createRef, useEffect, useState } from 'react'
 import {
@@ -9,6 +10,7 @@ import {
   // InfoWindow,
   Marker,
 } from 'react-google-maps'
+import { withGmapsContext } from './WithGoogleApi'
 import {
   getGmapsPolygonInstance,
   getGmapsMarkerInstance,
@@ -32,8 +34,8 @@ class RefMap {
   toArray = () => Object.keys(this).filter(k => this[k].current)
 }
 
-export default withGoogleMap(props => {
-  const { boundaries, areas, mapViewport, mapPosition } = props
+const BaseMapComponent = withGoogleMap(props => {
+  const { boundaries, areas, mapViewport, mapPosition, showErrors, editableAreas } = props
   // const update = useState()[1]
   const [editableAreaCaption, setEditableAreaCaption] = useState()
   const [zIndexMap, setZIndexMap] = useState({})
@@ -144,31 +146,34 @@ export default withGoogleMap(props => {
 
   function handleAreaClick(areaId) {
     return e => {
-      const point = { lat: e.latLng.lat(), lng: e.latLng.lng() }
-      const withPointIds = areas
-        .map((a, i) => (pointIsWithinGmapsPolygon(point, getGmapsPolygon(a.polygon)) ? i : null))
-        .filter(x => x !== null)
-        .sort((x, y) => (zIndexMap[y] || 0) - (zIndexMap[x] || 0))
+      if (editableAreas) {
+        const point = { lat: e.latLng.lat(), lng: e.latLng.lng() }
+        const withPointIds = areas
+          .map((a, i) => (pointIsWithinGmapsPolygon(point, getGmapsPolygon(a.polygon)) ? i : null))
+          .filter(x => x !== null)
+          .sort((x, y) => (zIndexMap[y] || 0) - (zIndexMap[x] || 0))
 
-      const newZIndexMap = { ...zIndexMap }
-      withPointIds.forEach(id => {
-        newZIndexMap[id] = (newZIndexMap[id] || 0) + 1
-      })
+        const newZIndexMap = { ...zIndexMap }
+        withPointIds.forEach(id => {
+          newZIndexMap[id] = (newZIndexMap[id] || 0) + 1
+        })
 
-      const losingFocusId = areas.findIndex(a => a.caption === editableAreaCaption)
-      newZIndexMap[losingFocusId] = -withPointIds.length
+        const losingFocusId = areas.findIndex(a => a.caption === editableAreaCaption)
+        newZIndexMap[losingFocusId] = -withPointIds.length
 
-      if (losingFocusId !== areaId) {
-        newZIndexMap[areaId] = areas.length
+        if (losingFocusId !== areaId) {
+          newZIndexMap[areaId] = areas.length
+          setZIndexMap(newZIndexMap)
+          setEditableAreaCaption(areas[areaId].caption)
+          return
+        }
+
+        const nextId = withPointIds[0]
+        newZIndexMap[nextId] = areas.length
         setZIndexMap(newZIndexMap)
-        setEditableAreaCaption(areas[areaId].caption)
-        return
+        setEditableAreaCaption(areas[nextId].caption)
       }
-
-      const nextId = withPointIds[0]
-      newZIndexMap[nextId] = areas.length
-      setZIndexMap(newZIndexMap)
-      setEditableAreaCaption(areas[nextId].caption)
+      props.onAreaClick(areas[areaId])
     }
   }
 
@@ -186,7 +191,9 @@ export default withGoogleMap(props => {
     if (marker) marker.setAnimation(MarkerAnimations.BOUNCE)
   }
   const handleMarkerDragEnd = event => {
-    props.onMarkerDragEnd(event)
+    if (!props.editableMarker) return
+    const newPosition = { lat: event.latLng.lat(), lng: event.latLng.lng() }
+    props.onMarkerDragEnd(newPosition)
     const marker = getGmapsMarkerInstance(markerRef.current)
     if (marker) marker.setAnimation(MarkerAnimations.SMALL_DROP)
   }
@@ -233,15 +240,15 @@ export default withGoogleMap(props => {
       anchor: gmapsPoint(12, 24),
       path:
         'M19 1H5c-1.1 0-1.99.9-1.99 2L3 15.93c0 .69.35 1.3.88 1.66L12 23l8.11-5.41c.53-.36.88-.97.88-1.66L21 3c0-1.1-.9-2-2-2zm-9 15l-5-5 1.41-1.41L10 13.17l7.59-7.59L19 7l-9 9z',
-      fillColor: area.isValid ? polyColors[id % 7] : 'red',
+      fillColor: !showErrors || area.isValid ? polyColors[id % 7] : 'red',
       fillOpacity: 0.85,
-      strokeColor: area.isValid ? `${polyColorsHex[id % 7]}50` : '#FF000050',
+      strokeColor: !showErrors || area.isValid ? `${polyColorsHex[id % 7]}50` : '#FF000050',
     },
     dragging: {},
   })
 
   return (
-    <GoogleMap ref={mapRef} google={props.google} center={props.mapPosition} onClick={handleMapClick}>
+    <GoogleMap ref={mapRef} google={props.google} center={props.mapPosition} onClick={handleMapClick} zoom={props.zoom}>
       {/**
       ---------------------------------------------
       ------------------------------BOUNDARIES POLYGONS
@@ -273,8 +280,8 @@ export default withGoogleMap(props => {
         areas.map((area, id) => (
           <div key={`${area.caption}poly-n-marker`}>
             <Polygon
-              editable={editableAreaCaption === area.caption}
-              draggable={editableAreaCaption === area.caption}
+              editable={editableAreas && editableAreaCaption === area.caption}
+              draggable={editableAreas && editableAreaCaption === area.caption}
               key={area.caption}
               // onDragStart={handleAreaDragStart(id)}
               onDrag={handleAreaDrag(id)}
@@ -287,9 +294,9 @@ export default withGoogleMap(props => {
               options={{
                 clickable: true,
                 strokeWeight: 2,
-                strokeColor: area.isValid ? polyColors[id % 7] : 'red',
+                strokeColor: !showErrors || area.isValid ? polyColors[id % 7] : 'red',
                 strokeOpacity: 1,
-                fillColor: area.isValid ? polyColors[id % 7] : 'red',
+                fillColor: !showErrors || area.isValid ? polyColors[id % 7] : 'red',
                 fillOpacity: 0.05,
                 zIndex: zIndexMap[id] || 0,
               }}
@@ -315,10 +322,10 @@ export default withGoogleMap(props => {
       ---------------------------------GMAPS MARKER
       ---------------------------------------------
       */}
-      {props.showMarker && (
+      {props.showMarker && !isEmpty(props.markerPosition) && (
         <Marker
           animation={google.maps.Animation.DROP}
-          draggable
+          draggable={props.editableMarker}
           google={props.google}
           key={0}
           onDragEnd={handleMarkerDragEnd}
@@ -331,3 +338,53 @@ export default withGoogleMap(props => {
     </GoogleMap>
   )
 })
+
+function GmapsAreaWindow(props) {
+  // eslint-disable-next-line react/prop-types
+  if (!props.withGmapsScripts) {
+    throw new Error('Need outter WithGoogleApi component, with your own api key as prop.')
+  }
+
+  return (
+    <BaseMapComponent
+      containerElement={<div style={props.windowStyle} />}
+      mapElement={<div style={{ height: '100%' }} />}
+      {...props}
+    />
+  )
+}
+
+GmapsAreaWindow.propTypes = {
+  windowStyle: PropTypes.object,
+  showErrors: PropTypes.bool,
+  zoom: PropTypes.number,
+  mapViewport: PropTypes.object,
+  mapPosition: PropTypes.object,
+  // boundaries & areas
+  boundaries: PropTypes.array,
+  areas: PropTypes.array,
+  editableAreas: PropTypes.bool,
+  onAreaChange: PropTypes.func,
+  onAreaRemove: PropTypes.func,
+  onAreaClick: PropTypes.func,
+  // marker
+  markerPosition: PropTypes.object,
+  showMarker: PropTypes.bool,
+  editableMarker: PropTypes.bool,
+  onMarkerDragEnd: PropTypes.func,
+}
+
+GmapsAreaWindow.defaultProps = {
+  windowStyle: {
+    height: '600px',
+    margin: '16px 0px 0px 0px',
+  },
+  zoom: 15,
+  boundaries: [],
+  onMarkerDragEnd: () => {},
+  onAreaChange: () => {},
+  onAreaRemove: () => {},
+  onAreaClick: () => {},
+}
+
+export default withGmapsContext(GmapsAreaWindow)
