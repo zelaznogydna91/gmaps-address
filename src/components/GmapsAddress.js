@@ -23,16 +23,14 @@ import {
   getMapViewportFromAreas,
   getStreetAddrPartsFromGeoResult,
   sameAreas,
-  // getGmapsPolygon,
-  // pointIsWithinGmapsPolygon,
   isAreaWithinBounds,
 } from './utils'
 
 Geocode.enableDebug()
 const styles = theme => ({
   gmapsWindow: {
-    marginTop: theme.spacing(1),
-    marginBottom: theme.spacing(1),
+    marginTop: theme.spacing.unit * 1,
+    marginBottom: theme.spacing.unit * 1,
   },
 
   divider: {
@@ -47,8 +45,8 @@ const styles = theme => ({
   },
   fabContainer: {
     alignSelf: 'center',
-    marginRight: theme.spacing(1),
-    marginBottom: theme.spacing(0.5),
+    marginRight: theme.spacing.unit * 1,
+    marginBottom: theme.spacing.unit * 0.5,
   },
   fab: {
     alignSelf: 'center',
@@ -59,25 +57,6 @@ const styles = theme => ({
 })
 
 const TheHeartOfKendall = { lat: 25.678167, lng: -80.404497 }
-
-/**
- * Street Address mode
- * - On valid value (shape {caption?, heart} )
- *   - query geocode with heart
- *   - saveInStateStreetAddressDetails
- * - On value empty
- *   - input shown empty -- { address: '', markerPosition: userCurrentLocation || null }
- * - On invalid value (shape diff from {caption?, heart} )
- *   - { showError: true, address: value, markerPosition: userCurrentLocation || null }
- *
- * Area Mode
- * - On valid value (areas array shape [ {caption?,heart,polygon} ])
- *   - set { currentAreaSelection: value }
- * - On empty value (areas = [])
- *   - set { currentAreaSelection: [] }
- * - On invalid value (shape diff from [ {caption?, heart, polygon} ])
- *   - set { currentAreaSelection: [] }
- */
 
 class GmapsAddress extends Component {
   constructor(props) {
@@ -212,12 +191,6 @@ class GmapsAddress extends Component {
       showChipAreaPicker: !prev.showChipAreaSelect,
     }))
   }
-
-  // handleHeartDragEnd = (areaId, newHeart) => {
-  //   this.updateArea(areaId, {
-  //     heart: newHeart,
-  //   })
-  // }
 
   saveInStateStreetAddressDetails = (newLat, newLng, addressDetails, updateMapPos) => {
     const location = { lat: newLat, lng: newLng }
@@ -384,7 +357,6 @@ class GmapsAddress extends Component {
     const existing = this.state.addedUserAreas
     for (let i = 1; i < Number.MAX_VALUE; i += 1) {
       const name = `Area${i}`
-      console.log('getNextGenAreaName', name)
       if (!existing.some(x => x.caption === name)) return name
     }
     throw new Error("unbelievable ...\nshouldn't you have less areas?")
@@ -442,8 +414,6 @@ class GmapsAddress extends Component {
       }
       const currentAreaSelectionUpdate = [...prev.currentAreaSelection]
       currentAreaSelectionUpdate[areaId] = areaUpdate
-
-      console.log('updateArea', addedUserAreaUpdate, currentAreaSelectionUpdate)
       return {
         ...addedUserAreaUpdate,
         currentAreaSelection: currentAreaSelectionUpdate,
@@ -453,7 +423,6 @@ class GmapsAddress extends Component {
 
   handleAreaChangeOnMapWindow = (areaId, areaChanges) => {
     let polygonUpdate = {}
-    console.log('handleAreaChangeOnMapWindow', areaChanges)
     if (areaChanges.polygon) {
       const boundaryPolygons = (this.props.boundaries || []).map(b => b.polygon)
       polygonUpdate = {
@@ -463,7 +432,6 @@ class GmapsAddress extends Component {
     }
     const heartUpdate = {}
     if (areaChanges.heart) heartUpdate.heart = areaChanges.heart
-    console.log('handleAreaChangeOnMapWindow', polygonUpdate, heartUpdate)
     this.updateArea(areaId, {
       ...polygonUpdate,
       ...heartUpdate,

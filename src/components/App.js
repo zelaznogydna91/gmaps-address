@@ -2,7 +2,7 @@
  * TO BE RENAMED GmapsAddress and correct a few bugs...
  */
 import React, { useState } from 'react'
-import { Paper, makeStyles, Typography } from '@material-ui/core'
+import { Paper, withStyles, Typography } from '@material-ui/core'
 import GmapsAddress from './GmapsAddress'
 import WithGoogleApi from './WithGoogleApi'
 import LanguageProvider from './LanguageProvider'
@@ -27,11 +27,11 @@ const GOOGLE_API_KEY = 'AIzaSyC43U2-wqXxYEk1RBrTLdkYt3aDoOxO4Fw'
  * ------------------------------------------------------------------------------------------
  */
 
-const useStyles = makeStyles(theme => ({
+const styles = theme => ({
   paper: {
     display: 'block',
     marginLeft: '25%',
-    padding: theme.spacing(2),
+    padding: theme.spacing.unit * 2,
     width: '50%',
   },
   component: {
@@ -39,12 +39,12 @@ const useStyles = makeStyles(theme => ({
     height: '100%',
   },
   sections: {
-    padding: theme.spacing(1),
+    padding: theme.spacing.unit * 1,
   },
   divider: {
-    margin: theme.spacing(1),
+    margin: theme.spacing.unit * 1,
   },
-}))
+})
 
 const sampleData = {
   vendorStreetAddress: {
@@ -95,10 +95,10 @@ const sampleData = {
   ],
 }
 
-const App = () => {
+const App = withStyles(styles)(props => {
   const [streetAddr, setStreetAddr] = useState(sampleData.vendorStreetAddress)
   const [serviceAreas, setServiceAreas] = useState(sampleData.userServiceAreas)
-  const classes = useStyles()
+  const { classes } = props
   const areaMode = true
 
   return (
@@ -127,6 +127,6 @@ const App = () => {
       </LanguageProvider>
     </Paper>
   )
-}
+})
 
 export default App

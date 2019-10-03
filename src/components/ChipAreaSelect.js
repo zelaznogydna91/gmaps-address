@@ -1,5 +1,4 @@
 import React from 'react'
-import { makeStyles } from '@material-ui/core/styles'
 import Input from '@material-ui/core/Input'
 import InputLabel from '@material-ui/core/InputLabel'
 import MenuItem from '@material-ui/core/MenuItem'
@@ -9,17 +8,20 @@ import Chip from '@material-ui/core/Chip'
 import Typography from '@material-ui/core/Typography'
 import PropTypes from 'prop-types'
 import { FormattedMessage } from 'react-intl'
+// import withStyles from '@material-ui/styles/withStyles'
+import { withStyles } from '@material-ui/core/styles'
+
 import messages from './messages'
 
-const useStyles = makeStyles(theme => ({
+const styles = theme => ({
   root: {
     display: 'flex',
     flexWrap: 'wrap',
     width: '100%',
   },
   selectorSection: {
-    backgroundColor: 'rgba(0, 0, 0, 0.08)',
-    opacity: 'rgba(0, 0, 0, 0.8)',
+    backgroundColor: '#00000015',
+    padding: '0px',
   },
   formControl: {
     width: '100%',
@@ -32,9 +34,9 @@ const useStyles = makeStyles(theme => ({
     margin: 2,
   },
   noLabel: {
-    marginTop: theme.spacing(3),
+    marginTop: theme.spacing.unit * 3,
   },
-}))
+})
 
 const ITEM_HEIGHT = 48
 const ITEM_PADDING_TOP = 8
@@ -47,8 +49,8 @@ const MenuProps = {
   },
 }
 
-export default function ChipAreaSelect(props) {
-  const classes = useStyles()
+const ChipAreaSelect = props => {
+  const { classes } = props
   const { options, currentSelection, onChange, onAddNewArea } = props
 
   function addNewAreaActionWasSelected(selection) {
@@ -65,9 +67,6 @@ export default function ChipAreaSelect(props) {
   function handleDelete(value) {
     return () => onChange(currentSelection.filter(x => x !== value))
   }
-  console.log('options', options)
-  console.log('options[0].area', options[0].area)
-  // debugger
   return (
     <div className={classes.root}>
       <FormControl className={classes.formControl}>
@@ -146,3 +145,5 @@ ChipAreaSelect.propTypes = {
 ChipAreaSelect.defaultProps = {
   options: [],
 }
+
+export default withStyles(styles)(ChipAreaSelect)

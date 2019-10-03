@@ -3,16 +3,6 @@ import React from 'react'
 import { Input } from '@material-ui/core'
 import PropTypes from 'prop-types'
 
-// const useStyles = makeStyles(theme => ({
-//   root: {
-//     // padding: '2px 4px',
-//     padding: theme.spacing(1),
-//     // display: 'flex',
-//     display: 'inline-block',
-//     // alignItems: 'center',
-//   },
-// }))
-
 function GmapsAddressInput(props, ref) {
   //  const classes = useStyles()
   const {

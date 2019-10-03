@@ -92,7 +92,7 @@ export const samePolygons = (x, y) => {
 
 export const sameAreas = (a1, a2) => samePolygons(a1.polygon, a2.polygon) === true
 
-// common stuffs
+// common elements
 const SECRET_MARKER_KEY = '__SECRET_MARKER_DO_NOT_USE_OR_YOU_WILL_BE_FIRED'
 const SECRET_POLYGON_KEY = '__SECRET_POLYGON_DO_NOT_USE_OR_YOU_WILL_BE_FIRED'
 export const MarkerAnimations = {
